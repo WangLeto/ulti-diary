@@ -1,0 +1,13 @@
+{
+  "description": "极日记",
+  "setting": {
+    "urlCheck": true,
+    "es6": false,
+    "postcss": false,
+    "minified": false
+  },
+  "compileType": "miniprogram",
+  "appid": "wx7248f970ddf46532",
+  "projectname": "ulti-dairy",
+  "miniprogramRoot": "./dist"
+}
