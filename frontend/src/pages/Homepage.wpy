@@ -1,0 +1,18 @@
+<template>
+  <Calendar></Calendar>
+</template>
+
+<script>
+import wepy from 'wepy'
+import Calendar from '../components/calendar'
+export default class Homepage extends wepy.page {
+  components = {
+    Calendar: Calendar
+  };
+  data = {
+  };
+  onLoad() {
+    console.log('????')
+  }
+}
+</script>
