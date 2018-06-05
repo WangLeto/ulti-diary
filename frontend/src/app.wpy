@@ -24,14 +24,10 @@ setStore(store);
 export default class extends wepy.app {
   config = {
     pages: [
-<<<<<<< HEAD
     	'pages/Homepage',
-      'pages/index'
-=======
       'pages/AudioEdit',
       'pages/TextEdit',
       'pages/VideoEdit',
->>>>>>> 491697183b73ec338e620c9edecf8be16604482a
     ],
     window: {
       backgroundTextStyle: 'light',
