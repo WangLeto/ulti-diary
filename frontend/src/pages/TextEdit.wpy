@@ -1,0 +1,28 @@
+<style></style>
+<template>
+  <view class="main">
+    <view class="top-bar">
+      <image src="{{starImg}}" @tap="star"></image>
+      <image src="../assets/ok.png" wx:if="{{isFirstEdit}}"></image>
+      <image src="../assets/delete.png" @tap="del"></image>
+    </view>
+    <view class="below-panel">
+
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import baseEdit from '../mixins/editBase';
+
+export default class TextEdit extends wepy.page {
+  data = {
+    title: '图文日记'
+  };
+
+  mixins = [baseEdit];
+
+  methods = {
+  };
+}
+</script>

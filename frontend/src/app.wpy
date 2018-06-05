@@ -1,11 +1,13 @@
 <style lang="less">
-.container {
-  height: 100%;
+.top-bar {
+  box-shadow: 0 0 20rpx 1rpx #ccc;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  box-sizing: border-box;
+  justify-content: flex-end;
+}
+.top-bar image {
+  height: 50rpx;
+  width: 50rpx;
+  padding: 10rpx;
 }
 </style>
 
@@ -22,7 +24,9 @@ setStore(store);
 export default class extends wepy.app {
   config = {
     pages: [
-      'pages/index'
+      'pages/AudioEdit',
+      'pages/TextEdit',
+      'pages/VideoEdit',
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -33,42 +37,32 @@ export default class extends wepy.app {
   };
 
   globalData = {
-    userInfo: null
+    session: null
   };
 
   constructor() {
     super();
     this.use('requestfix');
+    this.intercept('request', {
+      config (p) {
+        return p;
+      },
+      success (p) {
+        return p;
+      },
+      fail (p) {
+        return p;
+      },
+      async complete (p) {
+        // 401 无 session 或 session 过期
+        if (p.statusCode === 401) {
+
+        }
+      }
+    });
   }
 
   onLaunch() {
-    this.testAsync();
-  }
-
-  sleep(s) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve('promise resolved');
-      }, s * 1000);
-    });
-  }
-
-  async testAsync() {
-    const data = await this.sleep(3);
-    console.log(data);
-  }
-
-  getUserInfo(cb) {
-    const that = this;
-    if (this.globalData.userInfo) {
-      return this.globalData.userInfo;
-    }
-    wepy.getUserInfo({
-      success(res) {
-        that.globalData.userInfo = res.userInfo;
-        cb && cb(res.userInfo);
-      }
-    });
   }
 }
 </script>
