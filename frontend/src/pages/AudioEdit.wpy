@@ -10,11 +10,11 @@
   color: #666666;
 }
 .current-time {
-  font-size: 120rpx;
-  line-height: 120rpx;
+  font-size: 100rpx;
+  line-height: 100rpx;
 }
 .total-time {
-  font-size: 50rpx;
+  font-size: 40rpx;
 }
 .btn-area {
   width:100%;
@@ -51,12 +51,12 @@
     <view class="below-panel">
       <view class="time-count">
         <view class="current-time">{{currentTime}}</view>
-        <view class="total-time" wx:if="{{isSubmitted}}">{{totalTime}}</view>
+        <view class="total-time" wx:if="{{showTotalTime}}">{{totalTime}}</view>
       </view>
       <titleEdit :name="name" :name.sync="name" wx:if="{{isSubmitted}}"></titleEdit>
       <view class="btn-area">
         <image class="main-btn" src="{{mainBtnImg}}" animation="{{mainBtnAnimation}}" @tap="mainTap"></image>
-        <image class="side-btn" src="{{sideBtnImg}}" animation="{{sideBtnAnimation}}" @tap="stopRecord"></image>
+        <image class="side-btn" src="../assets/audio/stop-record.jpg" animation="{{sideBtnAnimation}}" @tap="stopRecord"></image>
       </view>
     </view>
   </view>
@@ -65,12 +65,12 @@
 import wepy from 'wepy';
 import baseEdit from '../mixins/editBase';
 import TitleEdit from '../components/TitleEdit';
+import {tips} from '../utils/tips';
 
 const WAIT_RECORD = 0, RECORDING = 1, RECORD_PAUSE = 2, WAIT_PLAY = 3, PLAYING = 4, PLAY_PAUSE = 5;
 export default class AudioEdit extends wepy.page {
   data = {
     pageTitle: '语音日记',
-    sideBtnImg: '../assets/audio-done.jpg',
     mainBtnAnimation: null,
     sideBtnAnimation: null,
     state: {
@@ -80,6 +80,7 @@ export default class AudioEdit extends wepy.page {
         'recording', 'record-pause', 'wait-play', 'playing', 'play-pause'],
       current: 0
     },
+    recordTime: 0
   };
 
   components = {
@@ -88,13 +89,23 @@ export default class AudioEdit extends wepy.page {
 
   computed = {
     currentTime: function () {
-      return '00:00';
+      let stateNo = this.state.current;
+      if (stateNo === RECORDING || stateNo === RECORD_PAUSE) {
+        return this.secondFormat(this.recorder.currentTime);
+      } else if (stateNo === PLAYING || stateNo === PLAY_PAUSE) {
+        return this.secondFormat(this.player.currentTime);
+      } else {
+        return '00:00';
+      }
     },
     totalTime: function () {
-      return '/' + '00:10';
+      return '/' + this.secondFormat(Math.ceil(this.recordTime));
     },
     mainBtnImg: function () {
       return `../assets/audio/${this.state.states[this.state.current]}.jpg`;
+    },
+    showTotalTime: function () {
+      return !!this.id || this.recordTime !== 0;
     }
   };
 
@@ -136,6 +147,16 @@ export default class AudioEdit extends wepy.page {
     }
   };
 
+  secondFormat = function (seconds) {
+    let minutes = Math.floor(seconds / 60);
+    seconds = seconds - minutes * 60;
+    return this.str_pad_left(minutes, '0', 2) + ':' + this.str_pad_left(seconds, '0', 2);
+  };
+
+  str_pad_left = function (string, pad, length) {
+    return (new Array(length + 1).join(pad) + string).slice(-length);
+  };
+
   hideSideBtn = function () {
     this.mainBtnAnimation = wx.createAnimation({timingFunction: 'ease'});
     this.sideBtnAnimation = wx.createAnimation({timingFunction: 'ease'});
@@ -152,58 +173,106 @@ export default class AudioEdit extends wepy.page {
 
   recorder = {
     global: this,
-    recorderManager: null,
-    recordFile: null,
-    init: function () {
-      let that = this;
-      this.recorderManager = wx.getRecorderManager();
-    },
+    recorderManager: wx.getRecorderManager(),
+    currentTime: 0,
+    microsecond: 0,
+    timePlusHandler: null,
     start: function () {
-      this.recorderManager.start();
+      tips.showTextToast('开始录音，最长时间10分钟');
+      this.recorderManager.start({
+        duration: 600000
+      });
+      this.plusSecond();
     },
     pause: function () {
+      let handler = this.timePlusHandler;
+      clearInterval(handler);
       this.recorderManager.pause();
     },
     resume: function () {
+      this.plusSecond();
       this.recorderManager.resume();
     },
     stop: function () {
       this.recorderManager.stop();
-      this.recordFile = this.recorderManager.onStop();
-      console.log(this.recordFile);
+      let that = this.global;
+      this.recorderManager.onStop(e => {
+        that.player.init(e.tempFilePath);
+      });
+    },
+    plusSecond: function () {
+      let that = this;
+      this.timePlusHandler = setInterval(e => {
+        that.microsecond++;
+        if (that.microsecond % 10 === 0) {
+          that.currentTime = that.microsecond / 10;
+          that.global.$apply();
+        }
+      }, 100);
     }
   };
 
   player = {
     global: this,
     innerPlayer: null,
-    init: function () {
-      let that = this;
-      this.innerPlayer = wx.createInnerAudioContext({
-        src: that.global.recorder.recordFile
-      });
+    currentTime: 0,
+    microsecond: 0,
+    timePlusHandler: null,
+    init: function (source) {
+      this.innerPlayer = wx.createInnerAudioContext();
+      this.innerPlayer.src = source;
+      this.getDuration();
     },
     play: function () {
+      this.plusSecond();
       this.innerPlayer.play();
     },
     pause: function () {
+      let handler = this.timePlusHandler;
+      clearInterval(handler);
       this.innerPlayer.pause();
     },
     stop: function () {
+      let handler = this.timePlusHandler;
+      clearInterval(handler);
+      this.currentTime = 0;
       this.innerPlayer.stop();
     },
     resume: function () {
-      this.innerPlayer.resume();
+      this.plusSecond();
+      this.innerPlayer.play();
     },
-    currentTime: function () {
-      console.log(this.innerPlayer.currentTime);
-      return this.innerPlayer.currentTime;
+    plusSecond: function () {
+      let that = this;
+      this.timePlusHandler = setInterval(e => {
+        that.microsecond++;
+        if (that.microsecond % 10 === 0) {
+          that.currentTime = that.microsecond / 10;
+          that.global.$apply();
+        }
+      }, 100);
+    },
+    getDuration: function () {
+      let calcIndex = 0;
+      let p = this.innerPlayer;
+      let gl = this.global;
+      let calcTimer = setInterval(function () {
+        calcIndex++;
+        // 反复尝试仍获取失败，则取消尝试
+        if (calcIndex > 50) {
+          clearInterval(calcTimer);
+          tips.showError('小程序出错');
+        }
+        if (p.duration > 0) {
+          gl.recordTime = p.duration;
+          gl.$apply();
+          clearInterval(calcTimer);
+        }
+      }, 100);
     }
   };
 
   onLoad () {
-    this.recorder.init();
-    this.player.init();
   }
 }
 </script>

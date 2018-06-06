@@ -21,6 +21,13 @@ let tips = {
 
   hideLoading: function () {
     wx.hideLoading();
+  },
+
+  showTextToast: function (title) {
+    wx.showToast({
+      title: title,
+      icon: 'none'
+    })
   }
 };
 

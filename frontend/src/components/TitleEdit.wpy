@@ -42,11 +42,11 @@
   </view>
   <view wx:if="{{isShowEdit}}">
     <view class="line" wx:if="{{!hasName}}">
-      <input class="title-input title" type="text" focus="true" placeholder="输入语音日记名称" value="{{name}}" bindinput="getInput"/>
+      <input class="title-input title" type="text" placeholder="输入语音日记名称" bindinput="getInput"/>
       <button class="sure-btn title">确认</button>
     </view>
     <view class="line" wx:if="{{hasName}}">
-      <input class="title-input title" type="text" value="{{name}}" bindinput="getInput"/>
+      <input class="title-input title" type="text" focus="true" value="{{name}}" bindinput="getInput"/>
       <button class="sure-btn title" @tap="sureRename">确认</button>
     </view>
   </view>
