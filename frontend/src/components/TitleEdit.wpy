@@ -1,0 +1,112 @@
+<style>
+.line {
+  display: flex;
+  justify-content: center;
+  margin: auto;
+}
+.show-title {
+  justify-content: center;
+}
+.title {
+  display: inline;
+  font-size: 26rpx;
+}
+.init-title {
+  font-size: 35rpx;
+}
+.edit-img {
+  height: 40rpx;
+  width: 40rpx;
+  padding-left: 30rpx;
+}
+.title-input {
+  padding: 0 8rpx;
+  border: solid 1rpx #e4e4e4;
+  border-radius: 20rpx;
+  text-align: center;
+  height: 70rpx;
+  line-height: 90rpx;
+  width: 50%;
+}
+.sure-btn {
+  width: 20%;
+  height: 75rpx;
+  line-height: 75rpx;
+  margin: 0 0 0 20rpx;
+}
+</style>
+<template>
+  <view class="line show-title" wx:if="{{!isShowEdit}}" @tap="showEditPanel">
+    <view class="init-title title">{{name}}</view>
+    <image class="edit-img title" src="../assets/edit.png"></image>
+  </view>
+  <view wx:if="{{isShowEdit}}">
+    <view class="line" wx:if="{{!hasName}}">
+      <input class="title-input title" type="text" focus="true" placeholder="输入语音日记名称" value="{{name}}" bindinput="getInput"/>
+      <button class="sure-btn title">确认</button>
+    </view>
+    <view class="line" wx:if="{{hasName}}">
+      <input class="title-input title" type="text" value="{{name}}" bindinput="getInput"/>
+      <button class="sure-btn title" @tap="sureRename">确认</button>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy';
+import {submitRename} from '../api/api';
+import tips from '../utils/tips';
+
+export default class TitleEdit extends wepy.component {
+  props = {
+    name: {
+      type: String,
+      twoWay: true,
+      default: null
+    },
+    id: {
+      type: String,
+      default: null
+    }
+  };
+
+  data = {
+    // 是否显示编辑的输入框和按钮：用户点击修改原标题或无标题的情况下
+    isShowEdit: false
+  };
+
+  computed = {
+    hasName: function () {
+      return !!this.name;
+    }
+  };
+
+  methods = {
+    getInput: function (e) {
+      this.name = e.detail.value;
+    },
+    sureRename: async function () {
+      console.log(this.name);
+      let name = this.name;
+      let id = this.id;
+      let result = await submitRename({
+        data: {
+          id: id,
+          name: name
+        }
+      });
+      if (result.statusCode === 200) {
+        this.isShowEdit = false;
+      } else {
+        tips.showError('重命名失败');
+      }
+    },
+    showEditPanel: function () {
+      this.isShowEdit = true;
+    }
+  };
+
+  onLoad = function () {
+    this.isShowEdit = !this.name;
+  }
+}
+</script>

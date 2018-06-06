@@ -1,5 +1,6 @@
 import wepy from 'wepy';
-import {submitDiary, submitStar} from '../api/api';
+import {submitDiary, submitStar, queryDiary} from '../api/api';
+import tips from '../utils/tips';
 
 export default class testMixin extends wepy.mixin {
   data = {
@@ -7,24 +8,25 @@ export default class testMixin extends wepy.mixin {
       star: ['../assets/star.png', '../assets/star-color.png']
     },
     isStared: false,
-    id: null
+    id: null,
+    name: null,
+    rawData: null
   };
 
   computed = {
     starImg: function () {
       return this.images.star[this.isStared ? 1 : 0];
     },
-
     // 是否已经上传过，控制 star 图标显示
-    isFirstEdit: function () {
-      return this.id === null;
+    isSubmitted: function () {
+      return !!this.id;
     }
   };
 
   onShow = function () {
     let that = this;
     wx.setNavigationBarTitle({
-      title: that.title
+      title: that.pageTitle
     });
   };
 
@@ -58,20 +60,40 @@ export default class testMixin extends wepy.mixin {
           blob: submitData
         }
       });
+      console.log(result);
       if (result.statusCode === 200) {
         this.id = result.data;
-      } else if (result.statusCode === 400) {
-        this.showError();
+        tips.showOk('上传成功');
+      } else {
+        tips.showError('上传失败');
       }
     }
-
   };
-
-  showError = function (msg) {
-
-  }
 
   packSubmitData = function () {
     return null;
+  };
+
+  onLoad (params) {
+    // todo 接口：判断是否是由记录点击进入，从而获取数据
+    if (params.id) {
+      let id = params.id;
+      this.id = id;
+      this.name = params.name;
+      this.getRawDiary(id);
+    }
+  }
+
+  getRawDiary = async function (id) {
+    let result = await queryDiary({
+      data: {
+        id: id
+      }
+    });
+    if (result.statusCode === 200) {
+      this.rawData = result.data;
+    } else {
+      tips.showError('获取日记失败！');
+    }
   }
 }

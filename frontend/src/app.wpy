@@ -24,8 +24,8 @@ setStore(store);
 export default class extends wepy.app {
   config = {
     pages: [
-    	'pages/Homepage',
       'pages/AudioEdit',
+    	'pages/Homepage',
       'pages/TextEdit',
       'pages/VideoEdit',
     ],
@@ -43,6 +43,7 @@ export default class extends wepy.app {
 
   constructor() {
     super();
+    this.use('promisify');
     this.use('requestfix');
     this.intercept('request', {
       config (p) {

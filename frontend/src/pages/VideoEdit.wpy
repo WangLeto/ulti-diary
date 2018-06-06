@@ -2,22 +2,27 @@
 <template>
   <view class="main">
     <view class="top-bar">
-      <image src="{{starImg}}" @tap="star"></image>
-      <image src="../assets/ok.png" wx:if="{{isFirstEdit}}"></image>
+      <image src="{{starImg}}" wx:if="{{!isSubmitted}}" @tap="star"></image>
+      <image src="../assets/ok.png" wx:if="{{isSubmitted}}"></image>
       <image src="../assets/delete.png" @tap="del"></image>
     </view>
     <view class="below-panel">
-
+      <titleEdit :name="name" :name.sync="name" wx:if="{{isSubmitted}}"></titleEdit>
     </view>
   </view>
 </template>
 <script>
 import wepy from 'wepy';
 import baseEdit from '../mixins/editBase';
+import TitleEdit from '../components/TitleEdit';
 
 export default class VideoEdit extends wepy.page {
   data = {
-    title: '视频日记'
+    pageTitle: '视频日记'
+  };
+
+  components = {
+    titleEdit: TitleEdit
   };
 
   mixins = [baseEdit];

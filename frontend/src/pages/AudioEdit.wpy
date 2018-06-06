@@ -1,29 +1,209 @@
 <style>
+.time-count {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  margin: 80rpx auto 20rpx;
+  height: 120rpx;
+}
+.time-count > view {
+  color: #666666;
+}
+.current-time {
+  font-size: 120rpx;
+  line-height: 120rpx;
+}
+.total-time {
+  font-size: 50rpx;
+}
+.btn-area {
+  width:100%;
+  height:700rpx;
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+}
+.btn-area > image {
+  position: absolute;
+}
+.main-btn {
+  height: 240rpx;
+  width: 240rpx;
+  border-radius: 240rpx;
+  box-shadow: 0 0 16rpx 5rpx #bbb;
+  z-index: 120;
+}
+.side-btn {
+  height: 120rpx;
+  width: 120rpx;
+  border-radius: 120rpx;
+  box-shadow: 0 0 10rpx 5rpx #bbb;
+  opacity: 0;
+}
 </style>
 <template>
   <view class="main">
     <view class="top-bar">
-      <image src="{{starImg}}" @tap="star"></image>
-      <image src="../assets/ok.png" wx:if="{{isFirstEdit}}" @tap="submit"></image>
+      <image src="{{starImg}}" wx:if="{{!isSubmitted}}" @tap="star"></image>
+      <image src="../assets/ok.png" wx:if="{{isSubmitted}}" @tap="submit"></image>
       <image src="../assets/delete.png" @tap="del"></image>
     </view>
     <view class="below-panel">
-
+      <view class="time-count">
+        <view class="current-time">{{currentTime}}</view>
+        <view class="total-time" wx:if="{{isSubmitted}}">{{totalTime}}</view>
+      </view>
+      <titleEdit :name="name" :name.sync="name" wx:if="{{isSubmitted}}"></titleEdit>
+      <view class="btn-area">
+        <image class="main-btn" src="{{mainBtnImg}}" animation="{{mainBtnAnimation}}" @tap="mainTap"></image>
+        <image class="side-btn" src="{{sideBtnImg}}" animation="{{sideBtnAnimation}}" @tap="stopRecord"></image>
+      </view>
     </view>
   </view>
 </template>
 <script>
 import wepy from 'wepy';
 import baseEdit from '../mixins/editBase';
+import TitleEdit from '../components/TitleEdit';
 
+const WAIT_RECORD = 0, RECORDING = 1, RECORD_PAUSE = 2, WAIT_PLAY = 3, PLAYING = 4, PLAY_PAUSE = 5;
 export default class AudioEdit extends wepy.page {
   data = {
-    title: '语音日记'
+    pageTitle: '语音日记',
+    sideBtnImg: '../assets/audio-done.jpg',
+    mainBtnAnimation: null,
+    sideBtnAnimation: null,
+    state: {
+      // 0 等待开始录制
+      states: ['wait-record',
+        // 状态依次为：1 录制中，2 暂停录制，3 录指完成/等待播放，4 播放中，5 暂停播放
+        'recording', 'record-pause', 'wait-play', 'playing', 'play-pause'],
+      current: 0
+    },
+  };
+
+  components = {
+    titleEdit: TitleEdit
+  };
+
+  computed = {
+    currentTime: function () {
+      return '00:00';
+    },
+    totalTime: function () {
+      return '/' + '00:10';
+    },
+    mainBtnImg: function () {
+      return `../assets/audio/${this.state.states[this.state.current]}.jpg`;
+    }
   };
 
   mixins = [baseEdit];
 
   methods = {
+    mainTap: function () {
+      switch (this.state.current) {
+      case WAIT_RECORD:
+        this.showSideBtn();
+        this.state.current = RECORDING;
+        this.recorder.start();
+        break;
+      case RECORDING:
+        this.state.current = RECORD_PAUSE;
+        this.recorder.pause();
+        break;
+      case RECORD_PAUSE:
+        this.state.current = RECORDING;
+        this.recorder.resume();
+        break;
+      case WAIT_PLAY:
+        this.state.current = PLAYING;
+        this.player.play();
+        break;
+      case PLAYING:
+        this.state.current = PLAY_PAUSE;
+        this.player.pause();
+        break;
+      case PLAY_PAUSE:
+        this.state.current = PLAYING;
+        this.player.resume();
+      }
+    },
+    stopRecord: function () {
+      this.recorder.stop();
+      this.state.current = WAIT_PLAY;
+      this.hideSideBtn();
+    }
   };
+
+  hideSideBtn = function () {
+    this.mainBtnAnimation = wx.createAnimation({timingFunction: 'ease'});
+    this.sideBtnAnimation = wx.createAnimation({timingFunction: 'ease'});
+    this.mainBtnAnimation.translateX(0).step({duration: 200});
+    this.sideBtnAnimation.opacity(0).translateX(0).step({duration: 200});
+  };
+
+  showSideBtn = function () {
+    this.mainBtnAnimation = wx.createAnimation({timingFunction: 'ease'});
+    this.sideBtnAnimation = wx.createAnimation({timingFunction: 'ease'});
+    this.mainBtnAnimation.translateX(-30).step({duration: 200});
+    this.sideBtnAnimation.opacity(1).translateX(70).step({duration: 200});
+  };
+
+  recorder = {
+    global: this,
+    recorderManager: null,
+    recordFile: null,
+    init: function () {
+      let that = this;
+      this.recorderManager = wx.getRecorderManager();
+    },
+    start: function () {
+      this.recorderManager.start();
+    },
+    pause: function () {
+      this.recorderManager.pause();
+    },
+    resume: function () {
+      this.recorderManager.resume();
+    },
+    stop: function () {
+      this.recorderManager.stop();
+      this.recordFile = this.recorderManager.onStop();
+      console.log(this.recordFile);
+    }
+  };
+
+  player = {
+    global: this,
+    innerPlayer: null,
+    init: function () {
+      let that = this;
+      this.innerPlayer = wx.createInnerAudioContext({
+        src: that.global.recorder.recordFile
+      });
+    },
+    play: function () {
+      this.innerPlayer.play();
+    },
+    pause: function () {
+      this.innerPlayer.pause();
+    },
+    stop: function () {
+      this.innerPlayer.stop();
+    },
+    resume: function () {
+      this.innerPlayer.resume();
+    },
+    currentTime: function () {
+      console.log(this.innerPlayer.currentTime);
+      return this.innerPlayer.currentTime;
+    }
+  };
+
+  onLoad () {
+    this.recorder.init();
+    this.player.init();
+  }
 }
 </script>

@@ -14,7 +14,7 @@
     <block wx:for-items="{{list}}" wx:for-index="index" wx:for-item="item" wx:key="id">
       <view @tap="tap" class="mylist">
         <text>{{item.id}}</text>
-        : {{item.title}}
+        : {{item.name}}
       </view>
     </block>
   </view>
