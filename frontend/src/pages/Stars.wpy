@@ -1,7 +1,136 @@
+<style>
+.card {
+  border:#909090 1px solid;
+  background:#fff;
+  color:#333;
+  -moz-box-shadow: 2px 2px 10px #909090;
+  -webkit-box-shadow: 2px 2px 10px #909090;
+  box-shadow:2px 2px 10px #909090;
+}
+.img {
+  height: 50rpx;
+  width: 50rpx;
+}
+.diary-detail {
+  position: absolute;
+  right: 0rpx;
+}
+.line {
+  width: 1px;
+  height: 25px;
+  background: #000;
+  margin-left: 40rpx;
+}
+.circle {
+  width: 20rpx;
+  height: 20rpx;
+  border: 3rpx solid;
+  -webkit-border-radius: 10rpx;
+  margin-left: 30rpx;
+}
+.desc {
+  position: absolute;
+  right: 300rpx;
+  top: 10rpx;
+}
+.wrapper {
+  position: relative;
+}
+</style>
+
 <template>
-    <view class="container">
+  <scroll-view class="cards" scroll-y scroll-top="100">
+    
+    <!--有几个月的一个遍历-->
+    <view wx:for="{{alldiarys}}" wx:key="{{index}}" wx:for-item="diarys" wx:for-index="idx">
+      <view class="wrapper">
+        <view class="circle"></view>
+        <view class="line"></view>
+        <text class="desc">{{diarys[0].year + '年' + diarys[0].month + '月' + '  ' + diarys.length + '条收藏'}}</text>
+      </view>
+      <!--每个月的日记遍历-->
+      <view wx:for="{{diarys}}" wx:key="{{index}}">
+        <view class="card">
+          <view class="primary">
+            <image src="{{'../assets/' + alltype[item.type]}}" mode="aspectFit" class="img"></image>
+            <text class="text">{{item.title}}</text>
+          </view>
+          <view class="detail">
+            <text>{{item.time}}</text>
+            <text class="diary-detail">{{item.detail}}</text>
+          </view>
+        </view>
+        <view class="line"></view>
+      </view>
     </view>
+  </scroll-view>
 </template>
 
 <script>
+import wepy from 'wepy'
+export default class Stars extends wepy.page{
+  data = {
+    alldiarys: [
+      [{
+        title: 'hehe',
+        year: 2018,
+        month: 4,
+        time: '12:40',
+        ifstared: false,
+        type: 0,
+        detail: '200字2图'
+      },
+      {
+        title: 'lajifor',
+        year: 2018,
+        month: 4, 
+        time: '12:30',
+        ifstared: true,
+        type: 1,
+        detail: '3\'19\''
+      },
+      {
+        title: 'zhendelaji',
+        year: 2018,
+        month: 4,
+        time: '11:11',
+        ifstared: false,
+        type: 2,
+        detail: '1\'20\''
+      }],
+      [{
+        title: 'hehe',
+        year: 2018,
+        month: 4,
+        time: '12:40',
+        ifstared: false,
+        type: 0,
+        detail: '200字2图'
+      },
+      {
+        title: 'lajifor',
+        year: 2018,
+        month: 4,
+        time: '12:30',
+        ifstared: true,
+        type: 1,
+        detail: '3\'19\''
+      },
+      {
+        title: 'zhendelaji',
+        year: 2018,
+        month: 4,
+        time: '11:11',
+        ifstared: false,
+        type: 2,
+        detail: '1\'20\''
+      }],
+    ],
+    alltype: ['text.png', 'audio.png', 'video.png'],
+  };
+
+  onLoad() {
+    wx.setNavigationBarTitle({title: '我的收藏'});
+  }
+}
 </script>

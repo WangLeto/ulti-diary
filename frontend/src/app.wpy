@@ -28,6 +28,8 @@ export default class extends wepy.app {
       'pages/AudioEdit',
       'pages/TextEdit',
       'pages/VideoEdit',
+      'pages/Stars',
+      'pages/SearchPage',
     ],
     window: {
       backgroundTextStyle: 'light',

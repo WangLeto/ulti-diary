@@ -691,6 +691,7 @@ export default class Homepage extends wepy.page{
     this.curYear = curYear;
     this.curMonth = curMonth;
     this.weeksCh = weeksCh;
+    wx.setNavigationBarTitle({title: '极日记'});
   };
 }
 </script>
