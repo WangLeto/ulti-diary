@@ -1,51 +1,80 @@
 <style>
+page {
+  background: #f3f4f5;
+}
+.main-view {
+  margin-top: 30rpx;
+}
 .card {
-  border:#909090 1px solid;
-  background:#fff;
+  background:#fefefe;
   color:#333;
-  -moz-box-shadow: 2px 2px 10px #909090;
-  -webkit-box-shadow: 2px 2px 10px #909090;
-  box-shadow:2px 2px 10px #909090;
+  box-shadow: 0 1rpx 10rpx #ccc;
+}
+.primary {
+  display: flex;
+  height: 120rpx;
+  align-items: center;
 }
 .img {
-  height: 50rpx;
-  width: 50rpx;
+  height: 55rpx;
+  width: 55rpx;
+  padding-left: 30rpx;
 }
-.diary-detail {
-  position: absolute;
-  right: 0rpx;
+.text {
+  margin-left: 40rpx;
+  font-size:32rpx;
+  color:#666;
+}
+.detail {
+  background-color: #e2f8ff;
+  font-size:24rpx;
+  color:#666;
+  padding:3px 20rpx;
+  display:flex;
+  justify-content:space-between;
 }
 .line {
   width: 1px;
-  height: 25px;
-  background: #000;
+  height: 30rpx;
+  background: #999;
   margin-left: 40rpx;
 }
+.long.line {
+  height: 80rpx;
+}
 .circle {
-  width: 20rpx;
-  height: 20rpx;
-  border: 3rpx solid;
-  -webkit-border-radius: 10rpx;
-  margin-left: 30rpx;
+  width: 10rpx;
+  height: 10rpx;
+  border: 1rpx solid #999;
+  background: #fff;
+  border-radius: 50%;
+  margin-left: 35rpx;
 }
 .desc {
   position: absolute;
-  right: 300rpx;
-  top: 10rpx;
+  left: 60rpx;
+  top: 20rpx;
+  font-size: 30rpx;
+  color: #666;
 }
 .wrapper {
   position: relative;
 }
+.next-page-tip {
+  text-align:center;
+  padding:20rpx;
+  font-size:30rpx;
+  color:#666;
+}
 </style>
 
 <template>
-  <scroll-view class="cards" scroll-y scroll-top="100">
-    
+  <view class="main-view">
     <!--有几个月的一个遍历-->
     <view wx:for="{{alldiarys}}" wx:key="{{index}}" wx:for-item="diarys" wx:for-index="idx">
       <view class="wrapper">
         <view class="circle"></view>
-        <view class="line"></view>
+        <view class="line long"></view>
         <text class="desc">{{diarys[0].year + '年' + diarys[0].month + '月' + '  ' + diarys.length + '条收藏'}}</text>
       </view>
       <!--每个月的日记遍历-->
@@ -63,13 +92,23 @@
         <view class="line"></view>
       </view>
     </view>
-  </scroll-view>
+    <view class="next-page-tip">{{nextPageTip}}</view>
+  </view>
 </template>
 
 <script>
-import wepy from 'wepy'
+import wepy from 'wepy';
+import {tips} from '../utils/tips';
+
 export default class Stars extends wepy.page{
+  config = {
+    enablePullDownRefresh: true,
+    onReachBottomDistance: true
+  };
   data = {
+    // 逻辑有问题……不管了
+    hasPrePage: false,
+    hasNextPage: true,
     alldiarys: [
       [{
         title: 'hehe',
@@ -83,7 +122,7 @@ export default class Stars extends wepy.page{
       {
         title: 'lajifor',
         year: 2018,
-        month: 4, 
+        month: 4,
         time: '12:30',
         ifstared: true,
         type: 1,
@@ -129,8 +168,34 @@ export default class Stars extends wepy.page{
     alltype: ['text.png', 'audio.png', 'video.png'],
   };
 
+  computed = {
+    nextPageTip: function () {
+      if (this.hasNextPage) {
+        return '上拉加载下一页';
+      } else {
+        return '没有更多了';
+      }
+    }
+  };
+
+  onReachBottom = function () {
+    if (this.hasNextPage) {
+      this.hasNextPage = false;
+      this.hasPrePage = true;
+      tips.showOk('假装加载下页');
+    }
+  };
+
+  onPullDownRefresh = function () {
+    if (this.hasPrePage) {
+      this.hasPrePage = false;
+      this.hasNextPage = true;
+      tips.showOk('假装加载上页');
+    }
+  };
+
   onLoad() {
-    wx.setNavigationBarTitle({title: '我的收藏'});
+    wx.setNavigationBarTitle({title: '我的收藏⭐'});
   }
 }
 </script>

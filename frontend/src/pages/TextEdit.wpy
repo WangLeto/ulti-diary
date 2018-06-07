@@ -1,4 +1,11 @@
 <style>
+.top-bar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 9999;
+  background: #fff;
+}
 .statistics {
   position: absolute;
   left: 0;
@@ -10,6 +17,13 @@
 .content {
   height: 100%;
 }
+.below-panel {
+  margin: 130rpx auto 0;
+  width: 90%;
+}
+textarea {
+  width: 100%;
+}
 </style>
 <template>
   <view class="main">
@@ -20,12 +34,13 @@
       <image src="../assets/ok.png" wx:if="{{!isSubmitted}}"></image>
       <image src="../assets/delete.png" @tap="del"></image>
     </view>
-    <scroll-view>
+    <scroll-view class="below-panel">
       <view class="content" wx:for="{{content}}" wx:key="{{index}}">
-        <textarea wx:if="{{item.type == 0}}" value="{{item.content}}" auto-height @input="getInput({{index}})" focus="{{focused == index}}"></textarea>
+        <textarea wx:if="{{item.type == 0}}" value="{{item.content}}" auto-height maxlength="-1"
+                  @input="getInput({{index}})" focus="{{focused == index}}"></textarea>
         <image wx:if="{{item.type == 1}}" src="{{item.content}}" class="img" @longpress="delImage({{index}})"></image>
       </view>
-      <textarea value="{{temp}}" auto-focus @input="getInput(-1)"></textarea>
+      <textarea value="{{temp}}" auto-focus auto-height @input="getInput(-1)" maxlength="-1"></textarea>
     </scroll-view>
     <view class="below-panel">
 

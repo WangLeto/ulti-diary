@@ -317,8 +317,6 @@ page {
   right: 10rpx;
   margin-top: 20rpx;
 }
-.diary-detail {
-}
 .icon {
   width:60rpx;
   height:60rpx;
@@ -336,34 +334,40 @@ page {
 .add {
   position: fixed;
   right: 70rpx;
-  bottom: 0rpx;
-  width: 60rpx;
-  height: 60rpx;
-  background-color: #006400;
+  bottom: 70rpx;
+  width: 80rpx;
+  height: 80rpx;
   border-radius:50%;
+  background-color: #009688;
+  box-shadow: 10rpx 10rpx 20rpx 2rpx rgba(0,0,0,0.3);
   padding: 25rpx;
   z-index: 20;
 }
 .smbtn {
   position: fixed;
-  right: 85rpx;
-  bottom: 15rpx;
-  width: 40rpx;
-  height: 40rpx;
-  background-color: #006400;
+  right: 78rpx;
+  bottom: 70rpx;
+  width: 50rpx;
+  height: 50rpx;
   border-radius:50%;
+  background-color: #009688;
+  box-shadow: 8rpx 8rpx 14rpx 1rpx rgba(0,0,0,0.3);
   padding: 20rpx;
   z-index: 10;
 }
 .smtext {
   position: fixed;
-  right: 190rpx;
-  bottom: 30rpx;
+  right: 220rpx;
+  bottom: 90rpx;
+  font-size: 30rpx;
+  color: #666;
 }
 .tuwen {
   position: fixed;
-  bottom: 30rpx;
-  right: 190rpx;
+  bottom: 100rpx;
+  right: 220rpx;
+  font-size: 30rpx;
+  color: #666;
 }
 .all {
   position: absolute;
@@ -414,8 +418,8 @@ page {
       </view>
     </view>
     <view class="icon-wrapper">
-      <image src="../assets/star.png" class="icon"></image>
-      <image src="../assets/search.png" class="icon"></image>
+      <image src="../assets/star.png" class="icon" @tap="goStarPage"></image>
+      <image src="../assets/search.png" class="icon" @tap="goSearchPage"></image>
     </view>
     <!--日记detail-->
     <scroll-view class="cards" scroll-y scroll-top="100">
@@ -439,11 +443,11 @@ page {
     <text class="tuwen">普通图文</text>
     <view animation="{{audioAnimation}}">
       <text class="smtext">录音</text>
-      <image src="../assets/create-audio.png" class="smbtn"></image>
+      <image src="../assets/create-audio.png" class="smbtn" @tap="goAudioPage"></image>
     </view>
     <view animation="{{videoAnimation}}">
       <text class="smtext">短视频</text>
-      <image src="../assets/create-video.png" class="smbtn"></image>
+      <image src="../assets/create-video.png" class="smbtn" @tap="goVideoPage"></image>
     </view>
   </view>
 
@@ -514,7 +518,7 @@ export default class Homepage extends wepy.page{
       }
     ],
     alltype: ['text.png', 'audio.png', 'video.png'],
-  }
+  };
   getThisMonthDays(year, month) {
     return new Date(year, month, 0).getDate();
   };
@@ -627,12 +631,13 @@ export default class Homepage extends wepy.page{
         this.btnimg = '../assets/create-text.png';
         this.$apply();
         let audioAnimation = wx.createAnimation({timingFunction: 'ease', duration: 400});
-        this.audioAnimation = audioAnimation.translateY(-45).step().export();
+        this.audioAnimation = audioAnimation.opacity(1).translateY(-90).step().export();
         this.$apply();
-        let videoAnimation = wx.createAnimation({timingFunction: 'ease', duration: 400});
-        this.videoAnimation = videoAnimation.translateY(-85).step().export();
+        let videoAnimation = wx.createAnimation({timingFunction: 'ease', duration: 450});
+        this.videoAnimation = videoAnimation.opacity(1).translateY(-155).step().export();
         this.$apply();
       } else {
+        this.methods.goTextPage();
         this.btnimg = '../assets/add-diary.png';
       }
     },
@@ -640,10 +645,10 @@ export default class Homepage extends wepy.page{
       if (this.checkstate === 1) {
         this.$apply();
         let audioAnimation = wx.createAnimation({timingFunction: 'ease', duration: 400});
-        this.audioAnimation = audioAnimation.translateY(45).step().export();
+        this.audioAnimation = audioAnimation.opacity(0).translateY(-10).step().export();
         this.$apply();
-        let videoAnimation = wx.createAnimation({timingFunction: 'ease', duration: 400});
-        this.videoAnimation = videoAnimation.translateY(85).step().export();
+        let videoAnimation = wx.createAnimation({timingFunction: 'ease', duration: 450});
+        this.videoAnimation = videoAnimation.opacity(0).translateY(-10).step().export();
         this.$apply();
       }
       setTimeout(()=>{
@@ -651,6 +656,43 @@ export default class Homepage extends wepy.page{
         this.btnimg = '../assets/add-diary.png';
         this.$apply();
       }, 300);
+    },
+    goStarPage() {
+      wepy.navigateTo({
+        url: 'Stars'
+      });
+    },
+    goSearchPage() {
+      wepy.navigateTo({
+        url: 'SearchPage'
+      });
+    },
+    goTextPage(e) {
+      let id = '';
+      if (e) {
+        id = e.currentTarget.id;
+      }
+      wepy.navigateTo({
+        url: 'TextEdit?id=' + id
+      });
+    },
+    goAudioPage(e) {
+      let id = '';
+      if (e) {
+        id = e.currentTarget.id;
+      }
+      wepy.navigateTo({
+        url: 'AudioEdit?id=' + id
+      });
+    },
+    goVideoPage(e) {
+      let id = '';
+      if (e) {
+        id = e.currentTarget.id;
+      }
+      wepy.navigateTo({
+        url: 'VideoEdit?id=' + id
+      });
     }
   };
   computed = {
@@ -661,7 +703,7 @@ export default class Homepage extends wepy.page{
         return '';
       }
     }
-  }
+  };
   onLoad() {
     const date = new Date();
     const curYear = date.getFullYear();
