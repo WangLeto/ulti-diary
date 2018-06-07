@@ -1,0 +1,75 @@
+<style>
+.card {
+  border:#909090 1px solid;
+  background:#fff;
+  color:#333;
+  -moz-box-shadow: 2px 2px 10px #909090;
+  -webkit-box-shadow: 2px 2px 10px #909090;
+  box-shadow:2px 2px 10px #909090;
+}
+.primary {
+  margin-bottom: 40rpx;
+  display: flex;
+  padding-top: 20rpx;
+}
+.img {
+  height: 50rpx;
+  width: 50rpx;
+}
+.text {
+  margin-left: 10rpx;
+}
+.detail {
+  background-color: #BFEFFF;
+}
+.star {
+  height: 25rpx;
+  width: 25rpx;
+}
+.star-wrapper {
+  position: absolute;
+  right: 0rpx;
+}
+</style>
+
+<template>
+  <view class="card">
+    <view wx:if="{{diary.ifstared}}" class="star-wrapper">
+      <image src="../assets/star-color.png" mode="aspectFit" class="star"></image>
+    </view>
+    <view class="primary">
+      <image src="{{check}}" mode="aspectFit" class="img"></image>
+      <text class="text">{{diary.title}}</text>
+    </view>
+    <view class="detail">
+      <text>{{diary.time}}</text>
+      <text>{{diary.detail}}</text>
+    </view>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+export default class Card extends wepy.component {
+  props = {
+    diary: {
+      title: {type: String, default: ''},
+      time: {type: String, default: ''},
+      ifstared: {type: Boolean, default: false},
+      ty: {type: String, default: '0'},
+    }
+  };
+  data = {
+    imgtype: ['text.png', 'audio.png', 'vedio.png'],
+  };
+  computed = {
+    check() {
+      let pre =  '../assets/'
+      let type = parseInt(this.diary.ty)
+      return pre + this.imgtype[type]
+    }
+  };
+  onLoad() {
+  }
+}
+</script>

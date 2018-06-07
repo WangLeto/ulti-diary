@@ -24,8 +24,8 @@ setStore(store);
 export default class extends wepy.app {
   config = {
     pages: [
+      'pages/Homepage',
       'pages/AudioEdit',
-    	'pages/Homepage',
       'pages/TextEdit',
       'pages/VideoEdit',
     ],
