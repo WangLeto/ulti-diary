@@ -15,14 +15,19 @@
   color: #666;
 }
 .content {
-  height: 100%;
+  display: flex;
+}
+.img {
+  margin: 30rpx auto;
 }
 .below-panel {
-  margin: 130rpx auto 0;
+  margin: 130rpx auto 660rpx;
   width: 90%;
 }
 textarea {
   width: 100%;
+  z-index: -10;
+  background: #f8f8f8;
 }
 </style>
 <template>
@@ -34,16 +39,15 @@ textarea {
       <image src="../assets/ok.png" wx:if="{{!isSubmitted}}"></image>
       <image src="../assets/delete.png" @tap="del"></image>
     </view>
-    <scroll-view class="below-panel">
-      <view class="content" wx:for="{{content}}" wx:key="{{index}}">
-        <textarea wx:if="{{item.type == 0}}" value="{{item.content}}" auto-height maxlength="-1"
-                  @input="getInput({{index}})" focus="{{focused == index}}"></textarea>
-        <image wx:if="{{item.type == 1}}" src="{{item.content}}" class="img" @longpress="delImage({{index}})"></image>
-      </view>
-      <textarea value="{{temp}}" auto-focus auto-height @input="getInput(-1)" maxlength="-1"></textarea>
-    </scroll-view>
     <view class="below-panel">
-
+      <view class="content" wx:for="{{content}}" wx:key="{{index}}">
+        <textarea wx:if="{{item.type == 0}}" value="{{item.content}}" auto-height maxlength="-1" cursor-spacing="30"
+                  @input="getInput({{index}})" focus="{{focused == index}}"></textarea>
+        <image wx:if="{{item.type == 1}}" src="{{item.content}}" class="img" @tap="previewImage({{index}})"
+               @longpress="delImage({{index}})"></image>
+      </view>
+      <textarea value="{{temp}}" auto-focus auto-height @input="getInput(-1)"
+                maxlength="-1" cursor-spacing="30"></textarea>
     </view>
   </view>
 </template>
@@ -51,6 +55,7 @@ textarea {
 import wepy from 'wepy';
 import baseEdit from '../mixins/editBase';
 import _ from 'lodash';
+import {tips} from '../utils/tips';
 
 export default class TextEdit extends wepy.page {
   data = {
@@ -60,6 +65,7 @@ export default class TextEdit extends wepy.page {
     temp: '',
     imageCount: 0,
     focused: -1,
+    imageOperateTipped: false
   };
 
   components = {
@@ -85,7 +91,22 @@ export default class TextEdit extends wepy.page {
     confirm: function (e) {
 
     },
+    previewImage: function (index) {
+      let src = this.content[index].content;
+      console.log(src);
+      wx.previewImage({
+        // 似乎本地资源无法预览
+        urls: [src],
+        fail: e => {
+          console.log(e);
+        }
+      });
+    },
     insertImage: function () {
+      if (!this.imageOperateTipped) {
+        tips.showTextToast('长按图片操作，点击图片预览');
+        this.imageOperateTipped = true;
+      }
       if (this.temp != '') {
         let tp = {};
         tp.type = 0;
