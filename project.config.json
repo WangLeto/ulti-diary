@@ -1,0 +1,16 @@
+{
+	"description": "极日记",
+	"setting": {
+		"urlCheck": true,
+		"es6": false,
+		"postcss": false,
+		"minified": false,
+		"newFeature": true
+	},
+	"compileType": "miniprogram",
+	"appid": "wx7248f970ddf46532",
+	"projectname": "%E6%9E%81%E6%97%A5%E8%AE%B0",
+	"miniprogramRoot": "./frontend/dist",
+	"qcloudRoot": "./server",
+	"condition": {}
+}
