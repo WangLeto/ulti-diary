@@ -1,18 +1,696 @@
+<style>
+  page {
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.box {
+  display: flex;
+}
+
+.box-lr {
+  flex-direction: row;
+}
+
+.box-rl {
+  flex-direction: row-reverse;
+}
+
+.box-tb {
+  flex-direction: column;
+}
+
+.box-bt {
+  flex-direction: column-reverse;
+}
+
+.box-pack-center {
+  justify-content: center;
+}
+
+.box-pack-start {
+  justify-content: flex-start;
+}
+
+.box-pack-end {
+  justify-content: flex-end;
+}
+
+.box-pack-between {
+  justify-content: space-between;
+}
+
+.box-pack-around {
+  justify-content: space-around;
+}
+
+.box-align-center {
+  align-items: center;
+}
+
+.box-align-start {
+  align-items: flex-start;
+}
+
+.box-align-end {
+  align-items: flex-end;
+}
+
+.self-align-center {
+  align-self: center;
+  margin: 0 auto;
+}
+
+.self-align-start {
+  align-self: flex-start;
+}
+
+.self-align-end {
+  align-self: flex-end;
+}
+
+.self-align-stretch {
+  align-self: stretch;
+}
+
+.box-wrap {
+  flex-wrap: wrap;
+}
+
+.box-nowrap {
+  flex-wrap: nowrap;
+}
+
+.flex {
+  flex-grow: 1;
+}
+
+.shrink {
+  flex-shrink: 1;
+}
+
+.bg {
+  background-image: linear-gradient(to bottom, #faefe7, #ffcbd7);
+  overflow: hidden;
+}
+
+.brown-color {
+  color: #784344;
+}
+
+.pink-color {
+  color: #ff629a;
+}
+
+.white-color {
+  color: #fff;
+}
+
+.fs24 {
+  font-size: 24rpx;
+}
+
+.fs28 {
+  font-size: 28rpx;
+}
+
+.fs32 {
+  font-size: 32rpx;
+}
+
+.fs36 {
+  font-size: 36rpx;
+}
+
+.top-handle {
+  height: 80rpx;
+}
+
+.prev {
+  text-align: right;
+  height: 80rpx;
+}
+
+.next {
+  height: 80rpx;
+}
+
+.prev-handle {
+  width: 80rpx;
+  height: 100%;
+}
+
+.next-handle {
+  width: 80rpx;
+  height: 100%;
+}
+
+.date-area {
+  width: 50%;
+  height: 80rpx;
+  text-align: center;
+}
+
+.weeks {
+  height: 50rpx;
+  line-height: 50rpx;
+  opacity: 0.5;
+}
+
+.week {
+  text-align: center;
+}
+
+.days {
+  height: 500rpx;
+}
+
+.grid {
+  width: 107.1428571429rpx;
+}
+
+.day {
+  width: 60rpx;
+  height: 60rpx;
+  color: #88d2ac;
+  font-size: 26rpx;
+  font-weight: 200;
+}
+
+.border-radius {
+  border-radius: 50%;
+  position: relative;
+  left: 0;
+  top: 0;
+  color: #fff;
+}
+
+.pink-bg {
+  background-color: #ff629a;
+}
+
+.purple-bg {
+  background-color: #b8b8f1;
+}
+
+.right-triangle::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 0;
+  border: 15rpx solid transparent;
+  border-left-color: #ff629a;
+  position: absolute;
+  right: -22rpx;
+  top: 18rpx;
+}
+
+.left-triangle::before {
+  content: "";
+  display: block;
+  width: 0;
+  height: 0;
+  border: 15rpx solid transparent;
+  border-right-color: #ff629a;
+  position: absolute;
+  left: -22rpx;
+  top: 18rpx;
+}
+
+.tips {
+  text-align: center;
+  margin-top: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.types {
+  background-color: #ffedf4;
+  height: 50rpx;
+}
+
+.types-desc {
+  padding: 0 20rpx;
+}
+
+.type-name {
+  margin-top: 50rpx;
+  margin-bottom: 30rpx;
+}
+
+.type-desc {
+  padding: 0 35rpx;
+  line-height: 38rpx;
+}
+
+.explain {
+  border-top: 1px solid #eee;
+  width: 90%;
+  margin: 20rpx 5% 20rpx 5%;
+  padding: 20rpx 0;
+}
+
+.explain-title {
+  font-weight: bold;
+  margin-bottom: 15rpx;
+}
+
+.explain-item {
+  padding: 8rpx 20rpx;
+  color: #fff;
+}
+
+.left-border-radius {
+  border-top-left-radius: 20rpx;
+  border-bottom-left-radius: 20rpx;
+}
+
+.right-border-radius {
+  border-top-right-radius: 20rpx;
+  border-bottom-right-radius: 20rpx;
+}
+
+.picker-btns {
+  height: 120rpx;
+  line-height: 120rpx;
+  border-bottom: 1rpx solid #ff7ca0;
+}
+
+.picker-confirm {
+  margin-right: 50rpx;
+}
+
+.picker-cancel {
+  margin-left: 50rpx;
+}
+
+.picker-view {
+  color: #ff7ca0;
+  text-align: center;
+}
+.has-diary {
+  width: 10rpx;
+  height: 10rpx;
+  background: red;
+  -moz-border-radius: 5rpx;
+  -webkit-border-radius: 5rpx;
+  border-radius: 5rpx;
+  position: absolute;
+  bottom: 5rpx;
+}
+.riqi {
+  position: relative;
+}
+.cards {
+  height: 400rpx;
+}
+.card {
+  border:#909090 1px solid;
+  background:#fff;
+  color:#333;
+  -moz-box-shadow: 2px 2px 10px #909090;
+  -webkit-box-shadow: 2px 2px 10px #909090;
+  box-shadow:2px 2px 10px #909090;
+}
+.primary {
+  margin-bottom: 40rpx;
+  display: flex;
+  padding-top: 20rpx;
+}
+.img {
+  height: 50rpx;
+  width: 50rpx;
+}
+.text {
+  margin-left: 10rpx;
+}
+.detail {
+  background-color: #BFEFFF;
+}
+.star {
+  height: 30rpx;
+  width: 30rpx;
+}
+.star-wrapper {
+  position: absolute;
+  right: 0rpx;
+}
+.diary-detail {
+  position: absolute;
+  right: 0rpx;
+}
+.icon {
+  width: 45rpx;
+  height: 45rpx;
+  float: right;
+}
+.icon-wrapper {
+  margin-bottom: 40rpx;
+}
+
+.add {
+  position: fixed;
+  right: 70rpx;
+  bottom: 0rpx;
+  width: 60rpx;
+  height: 60rpx;
+  background-color: #006400;
+  border-radius:50%;
+  padding: 25rpx;
+  z-index: 20;
+}
+.smbtn {
+  position: fixed;
+  right: 85rpx;
+  bottom: 15rpx;
+  width: 40rpx;
+  height: 40rpx;
+  background-color: #006400;
+  border-radius:50%;
+  padding: 20rpx;
+  z-index: 10;
+}
+.smtext {
+  position: fixed;
+  right: 190rpx;
+  bottom: 30rpx;
+}
+.tuwen {
+  position: fixed;
+  bottom: 30rpx;
+  right: 190rpx;
+}
+.all {
+  position: absolute;
+  height: 100%;
+  width: 120%;
+  background-color: white;
+  opacity: 0.7;
+  z-index: 5;
+}
+.zin {
+  z-index: 10;
+}
+.picker {
+  position: absolute;
+  bottom: 0rpx;
+  z-index: 20;
+  width: 100%;
+  background-color: white;
+}
+</style>
+
 <template>
-  <Calendar></Calendar>
+  <view class="{{isblur}}" @tap="cancel"></view>
+    <view class="flex box box-tb box-align-center">
+      <view class="calendar pink-color box box-tb">
+        <view class="top-handle fs28 box box-lr box-align-center box-pack-center">
+          <view class="prev box box-rl" bindtap="handleCalendar" data-handle="prev">
+            <view class="prev-handle box box-lr box-align-center box-pack-center">《</view>
+          </view>
+          <view bindtap="chooseYearAndMonth" class="date-area box box-lr box-align-center box-pack-center">{{curYear || "--"}} 年 {{curMonth || "--"}} 月</view>
+          <view class="next box box-lr" bindtap="handleCalendar" data-handle="next">
+            <view class="next-handle box box-lr box-align-center box-pack-center">》</view>
+          </view>
+        </view>
+        <!--显示星期的view-->
+        <view class="weeks box box-lr box-pack-center box-align-center">
+          <view class="flex week fs28" wx:for="{{weeksCh}}" wx:key="{{index}}" data-idx="{{index}}">{{item}}</view>
+        </view>
+        <!--显示一个月-->
+        <view class="days box box-lr box-wrap">
+          <view wx:if="{{hasEmptyGrid}}" class="grid white-color box box-align-center box-pack-center" wx:for="{{empytGrids}}" wx:key="{{index}}" data-idx="{{index}}">
+          </view>
+          <view class="grid white-color box box-align-center box-pack-center riqi" wx:for="{{days}}" wx:key="{{index}}" data-idx="{{index}}" bindtap="tapDayItem">
+            <view class="day {{item.day == choosed ? 'border-radius pink-bg' : ''}} box box-align-center box-pack-center">{{item.day}}</view>
+            <view class="{{item.hasdiary ? 'has-diary' : ''}} box box-align-center box-pack-center"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+
+    <view class="icon-wrapper">
+      <image src="../assets/star.png" class="icon"></image>
+      <image src="../assets/search.png" class="icon"></image>
+    </view>
+    <!--日记detail-->
+    <scroll-view class="cards" scroll-y scroll-top="100">
+      <view class="card" wx:for="{{diarys}}" wx:key="{{index}}" data-idx="{{index}}">
+        <view wx:if="{{item.ifstared}}" class="star-wrapper">
+          <image src="../assets/star-color.png" mode="aspectFit" class="star"></image>
+        </view>
+        <view class="primary">
+          <image src="{{'../assets/' + alltype[item.type]}}" mode="aspectFit" class="img"></image>
+          <text class="text">{{item.title}}</text>
+        </view>
+        <view class="detail">
+          <text>{{item.time}}</text>
+          <text class="diary-detail">{{item.detail}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  <!--写日记按钮-->
+  <image src="{{btnimg}}" class="add" @tap="addTap"></image>
+  <view wx:if="{{checkstate === 1}}" class="zin">
+    <text class="tuwen">普通图文</text>
+    <view animation="{{audioAnimation}}">
+      <text class="smtext">录音</text>
+      <image src="../assets/create-audio.png" class="smbtn"></image>
+    </view>
+    <view animation="{{videoAnimation}}">
+      <text class="smtext">短视频</text>
+      <image src="../assets/create-video.png" class="smbtn"></image>
+    </view>
+  </view>
+
+  <!--日历选择器-->
+    <view wx:if="{{showPicker}}" class="box box-tb picker">
+      <view class="picker-btns box box-lr box-pack-between box-align-center">
+        <view class="picker-btn picker-cancel" data-type="cancel" bindtap="tapPickerBtn">取消</view>
+        <view class="picker-btn picker-confirm" data-type="confirm" bindtap="tapPickerBtn">确定</view>
+      </view>
+      <picker-view class="flex" indicator-style="height: 50px;" style="width: 100%; height: 150px;" value="{{pickerValue}}" bindchange="pickerChange">
+        <picker-view-column>
+          <view class="picker-view" wx:for="{{pickerYear}}" wx:key="*this" style="line-height: 50px">{{item}}年</view>
+        </picker-view-column>
+        <picker-view-column>
+          <view class="picker-view" wx:for="{{pickerMonth}}" wx:key="*this" style="line-height: 50px">{{item}}月</view>
+        </picker-view-column>
+      </picker-view>
+    </view>
 </template>
 
 <script>
 import wepy from 'wepy'
-import Calendar from '../components/calendar'
-export default class Homepage extends wepy.page {
+
+export default class Homepage extends wepy.page{
   components = {
-    Calendar: Calendar
   };
   data = {
-  };
-  onLoad() {
-    console.log('????')
+    //选择哪一天
+    choosed: 0,
+    hasEmptyGrid: false,
+    showPicker: false,
+    empytGrids: [],
+    days: [],
+    curYear: 0,
+    curMonth: 0,
+    pickerValue: [],
+    pickerYear: 0,
+    pickerMonth: 0,
+    weeksCh: [],
+    chooseYear: null,
+    chooseMonth: null,
+    //
+    btnimg: '../assets/add-diary.png',
+    checkstate: 0,
+    audioAnimation: null,
+    videoAnimation: null,
+    diarys: [
+      {
+        title: 'hehe',
+        time: '12:40',
+        ifstared: false,
+        type: 0,
+        detail: '200字2图'
+      },
+      {
+        title: 'lajifor', 
+        time: '12:30',
+        ifstared: true,
+        type: 1,
+        detail: '3\'19\''
+      },
+      {
+        title: 'zhendelaji',
+        time: '11:11',
+        ifstared: false,
+        type: 2,
+        detail: '1\'20\''
+      }
+    ],
+    alltype: ['text.png', 'audio.png', 'video.png'],
   }
+  getThisMonthDays(year, month) {
+    return new Date(year, month, 0).getDate();
+  };
+  getFirstDayOfWeek(year, month) {
+    return new Date(Date.UTC(year, month - 1, 1)).getDay();
+  };
+  calculateEmptyGrids(year, month) {
+    const firstDayOfWeek = this.getFirstDayOfWeek(year, month);
+    let empytGrids = [];
+    if (firstDayOfWeek > 0) {
+      for (let i = 0; i < firstDayOfWeek; i++) {
+        empytGrids.push(i);
+      }
+      this.hasEmptyGrid = true;
+      this.empytGrids = empytGrids;
+    } else {
+      this.hasEmptyGrid = false;
+      this.empytGrids = [];
+    }
+  };
+  calculateDays(year, month) {
+    let days = [];
+    const thisMonthDays = this.getThisMonthDays(year, month);
+    for (let i = 1; i <= thisMonthDays; i++) {
+      days.push({
+        day: i,
+        hasdiary: true,
+      });
+    }
+    this.days = days;
+  };
+  methods = {
+    //对月份进行调整的函数
+    handleCalendar(e) {
+      const handle = e.currentTarget.dataset.handle;
+      const curYear = this.curYear;
+      const curMonth = this.curMonth;
+      if (handle === 'prev') {
+        let newMonth = curMonth - 1;
+        let newYear = curYear;
+        if (newMonth < 1) {
+          newYear = curYear - 1;
+          newMonth = 12;
+        }
+        this.calculateDays(newYear, newMonth);
+        this.calculateEmptyGrids(newYear, newMonth);
+        this.curYear = newYear;
+        this.curMonth = newMonth;
+      } else {
+        let newMonth = curMonth + 1;
+        let newYear = curYear;
+        if (newMonth > 12) {
+          newYear = curYear + 1;
+          newMonth = 1;
+        }
+        this.calculateDays(newYear, newMonth);
+        this.calculateEmptyGrids(newYear, newMonth);
+        this.curYear = newYear;
+        this.curMonth = newMonth;
+      }
+      this.choosed = 0
+    },
+    //选择一个日期
+    tapDayItem(e) {
+      const idx = e.currentTarget.dataset.idx;
+      if (this.choosed == idx + 1) {
+        this.choosed = 0;
+      } else {
+        this.choosed = idx + 1;
+      }
+    },
+    //快速选择年份和日期
+    chooseYearAndMonth() {
+      const curYear = this.curYear;
+      const curMonth = this.curMonth;
+      let pickerYear = [];
+      let pickerMonth = [];
+      for (let i = 1900; i <= 2100; i++) {
+        pickerYear.push(i);
+      }
+      for (let i = 1; i <= 12; i++) {
+        pickerMonth.push(i);
+      }
+      const idxYear = pickerYear.indexOf(curYear);
+      const idxMonth = pickerMonth.indexOf(curMonth);
+      this.pickerValue = [idxYear, idxMonth];
+      this.pickerYear = pickerYear;
+      this.pickerMonth = pickerMonth;
+      this.showPicker = true;
+      this.choosed = 0;
+    },
+    pickerChange(e) {
+      const val = e.detail.value;
+      this.chooseYear = this.pickerYear[val[0]];
+      this.chooseMonth = this.pickerMonth[val[1]];
+    },
+    tapPickerBtn(e) {
+      const type = e.currentTarget.dataset.type;
+      if (type === 'confirm') {
+        this.curYear = this.chooseYear;
+        this.curMonth = this.chooseMonth;
+        this.calculateEmptyGrids(this.chooseYear, this.chooseMonth);
+        this.calculateDays(this.chooseYear, this.chooseMonth);
+      }
+      this.showPicker = false;
+    },
+    addTap() {
+      if (this.checkstate === 0) {
+        this.checkstate = 1;
+        this.btnimg = '../assets/create-text.png';
+        this.$apply();
+        let audioAnimation = wx.createAnimation({timingFunction: 'ease', duration: 400});
+        this.audioAnimation = audioAnimation.translateY(-45).step().export();
+        this.$apply();
+        let videoAnimation = wx.createAnimation({timingFunction: 'ease', duration: 400});
+        this.videoAnimation = videoAnimation.translateY(-85).step().export();
+        this.$apply();
+      } else {
+        this.btnimg = '../assets/add-diary.png';
+      }
+    },
+    cancel() {
+      if (this.checkstate === 1) {
+        this.$apply();
+        let audioAnimation = wx.createAnimation({timingFunction: 'ease', duration: 400});
+        this.audioAnimation = audioAnimation.translateY(45).step().export();
+        this.$apply();
+        let videoAnimation = wx.createAnimation({timingFunction: 'ease', duration: 400});
+        this.videoAnimation = videoAnimation.translateY(85).step().export();
+        this.$apply();
+      }
+      setTimeout(()=>{
+        this.checkstate = 0;
+        this.btnimg = '../assets/add-diary.png';
+        this.$apply();
+      }, 300);
+    }
+  };
+  computed = {
+    isblur() {
+      if (this.checkstate === 1 || this.showPicker) {
+        return 'all';
+      } else {
+        return '';
+      }
+    }
+  }
+  onLoad() {
+    const date = new Date();
+    const curYear = date.getFullYear();
+    const curMonth = date.getMonth() + 1;
+    const weeksCh = [ '日', '一', '二', '三', '四', '五', '六' ];
+    this.calculateEmptyGrids(curYear, curMonth);
+    this.calculateDays(curYear, curMonth);
+    this.curYear = curYear;
+    this.curMonth = curMonth;
+    this.weeksCh = weeksCh;
+  };
 }
 </script>
