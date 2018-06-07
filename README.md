@@ -1,5 +1,7 @@
 # 极日记
 
+查看我们的 [完整文档](https://wangleto.github.io/ulti-diary/) 。
+
 ## 前端
 
 使用 wepy 构建，[wepy 项目地址](https://github.com/Tencent/wepy)，[wepy 官方文档](https://tencent.github.io/wepy/document.html#/)。
