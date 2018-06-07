@@ -1,4 +1,17 @@
-<style></style>
+<style>
+.video-area {
+  margin: auto;
+  display: flex;
+  justify-content: center;
+}
+video {
+  margin: 50rpx auto;
+}
+.duration {
+  text-align: center;
+  margin: auto auto 30rpx;
+}
+</style>
 <template>
   <view class="main">
     <view class="top-bar">
@@ -7,6 +20,10 @@
       <image src="../assets/delete.png" @tap="del"></image>
     </view>
     <view class="below-panel">
+      <view class="video-area">
+        <video src="{{src}}" binderror="videoErrorCallback" controls></video>
+      </view>
+      <view class="duration">{{videoTime}}</view>
       <titleEdit :name="name" :name.sync="name" wx:if="{{isSubmitted}}"></titleEdit>
     </view>
   </view>
@@ -15,10 +32,14 @@
 import wepy from 'wepy';
 import baseEdit from '../mixins/editBase';
 import TitleEdit from '../components/TitleEdit';
+import {tips} from '../utils/tips';
 
 export default class VideoEdit extends wepy.page {
   data = {
-    pageTitle: '视频日记'
+    pageTitle: '视频日记',
+    id: null,
+    src: '',
+    videoDuration: 0
   };
 
   components = {
@@ -28,6 +49,33 @@ export default class VideoEdit extends wepy.page {
   mixins = [baseEdit];
 
   methods = {
+    videoErrorCallback: function () {
+      tips.showError('视频加载出错');
+    }
   };
+
+  computed = {
+    videoTime: function () {
+      return this.secondFormat2(this.videoDuration);
+    }
+  };
+
+  onLoad() {
+    tips.showTextToast('仅支持最长60s视频');
+    if (!this.id) {
+      let that = this;
+      wx.chooseVideo({
+        compressed: true,
+        success: e => {
+          that.src = e.tempFilePath;
+          that.videoDuration = e.duration;
+          that.$apply();
+        },
+        fail: e => {
+          tips.showError('视频导入失败');
+        }
+      });
+    }
+  }
 }
 </script>

@@ -3,6 +3,8 @@
   box-shadow: 0 0 20rpx 1rpx #ccc;
   display: flex;
   justify-content: flex-end;
+  padding-right: 20rpx;
+  height: 80rpx;
 }
 .top-bar image {
   height: 50rpx;

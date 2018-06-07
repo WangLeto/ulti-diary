@@ -23,13 +23,6 @@ export default class testMixin extends wepy.mixin {
     }
   };
 
-  onShow = function () {
-    let that = this;
-    wx.setNavigationBarTitle({
-      title: that.pageTitle
-    });
-  };
-
   methods = {
     star: async function () {
       this.isStared = !this.isStared;
@@ -74,7 +67,7 @@ export default class testMixin extends wepy.mixin {
     return null;
   };
 
-  onLoad (params) {
+  onLoad(params) {
     // todo 接口：判断是否是由记录点击进入，从而获取数据
     if (params.id) {
       let id = params.id;
@@ -82,6 +75,10 @@ export default class testMixin extends wepy.mixin {
       this.name = params.name;
       this.getRawDiary(id);
     }
+    let that = this;
+    wx.setNavigationBarTitle({
+      title: that.pageTitle
+    });
   }
 
   getRawDiary = async function (id) {
@@ -95,5 +92,22 @@ export default class testMixin extends wepy.mixin {
     } else {
       tips.showError('获取日记失败！');
     }
-  }
+  };
+
+  // 将秒数转为 00:01 字符串
+  secondFormat = function (seconds) {
+    let minutes = Math.floor(seconds / 60);
+    seconds = seconds - minutes * 60;
+    return this._str_pad_left(minutes, '0', 2) + ':' + this._str_pad_left(seconds, '0', 2);
+  };
+  // 转换为 0'12'' 字符串
+  secondFormat2 = function (seconds) {
+    let minutes = Math.floor(seconds / 60);
+    seconds = seconds - minutes * 60;
+    return minutes + "'" + seconds + "''";
+  };
+
+  _str_pad_left = function (string, pad, length) {
+    return (new Array(length + 1).join(pad) + string).slice(-length);
+  };
 }
