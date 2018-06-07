@@ -1,6 +1,6 @@
 <style>
-  page {
-  background-color: #fff;
+page {
+  background-color: #F7F9F7;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -21,6 +21,8 @@
 
 .box-tb {
   flex-direction: column;
+  margin-top: 20rpx;
+  background: #fff;
 }
 
 .box-bt {
@@ -88,45 +90,22 @@
   flex-grow: 1;
 }
 
-.shrink {
-  flex-shrink: 1;
-}
-
-.bg {
-  background-image: linear-gradient(to bottom, #faefe7, #ffcbd7);
-  overflow: hidden;
-}
-
-.brown-color {
-  color: #784344;
-}
-
 .pink-color {
-  color: #ff629a;
+  color: #666;
 }
 
 .white-color {
   color: #fff;
 }
 
-.fs24 {
-  font-size: 24rpx;
-}
 
 .fs28 {
   font-size: 28rpx;
 }
 
-.fs32 {
-  font-size: 32rpx;
-}
-
-.fs36 {
-  font-size: 36rpx;
-}
-
 .top-handle {
   height: 80rpx;
+  margin-top: -20rpx;
 }
 
 .prev {
@@ -175,7 +154,7 @@
 .day {
   width: 60rpx;
   height: 60rpx;
-  color: #88d2ac;
+  color: #101010;
   font-size: 26rpx;
   font-weight: 200;
 }
@@ -189,11 +168,7 @@
 }
 
 .pink-bg {
-  background-color: #ff629a;
-}
-
-.purple-bg {
-  background-color: #b8b8f1;
+  background-color: #FF9800;
 }
 
 .right-triangle::after {
@@ -291,63 +266,71 @@
   text-align: center;
 }
 .has-diary {
-  width: 10rpx;
-  height: 10rpx;
-  background: red;
-  -moz-border-radius: 5rpx;
-  -webkit-border-radius: 5rpx;
-  border-radius: 5rpx;
+  width: 20rpx;
+  height: 20rpx;
+  background: #dcf5eb;
+  border-radius: 10rpx;
   position: absolute;
-  bottom: 5rpx;
+  bottom: 0;
 }
 .riqi {
   position: relative;
 }
 .cards {
-  height: 400rpx;
+  height: 470rpx;
 }
 .card {
-  border:#909090 1px solid;
-  background:#fff;
+  background:#fefefe;
   color:#333;
-  -moz-box-shadow: 2px 2px 10px #909090;
-  -webkit-box-shadow: 2px 2px 10px #909090;
-  box-shadow:2px 2px 10px #909090;
+  box-shadow: 0 1rpx 10rpx #ccc;
+  margin: 30rpx 0 10rpx;
 }
 .primary {
-  margin-bottom: 40rpx;
   display: flex;
-  padding-top: 20rpx;
+  height: 120rpx;
+  align-items: center;
 }
 .img {
-  height: 50rpx;
-  width: 50rpx;
+  height: 55rpx;
+  width: 55rpx;
+  padding-left: 30rpx;
 }
 .text {
-  margin-left: 10rpx;
+  margin-left: 40rpx;
+  font-size:32rpx;
+  color:#666;
 }
 .detail {
-  background-color: #BFEFFF;
+  background-color: #e2f8ff;
+  font-size:24rpx;
+  color:#666;
+  padding:3px 20rpx;
+  display:flex;
+  justify-content:space-between;
 }
 .star {
-  height: 30rpx;
-  width: 30rpx;
+  height: 40rpx;
+  width: 40rpx;
 }
 .star-wrapper {
   position: absolute;
-  right: 0rpx;
+  right: 10rpx;
+  margin-top: 20rpx;
 }
 .diary-detail {
-  position: absolute;
-  right: 0rpx;
 }
 .icon {
-  width: 45rpx;
-  height: 45rpx;
+  width:60rpx;
+  height:60rpx;
   float: right;
+  padding:20rpx 0 0 20rpx;
 }
 .icon-wrapper {
-  margin-bottom: 40rpx;
+  background:#fff;
+  height:100rpx;
+  padding-right:15px;
+  box-shadow:0 30rpx 30rpx 1rpx rgba(0,0,0,0.15);
+  z-index: 1;
 }
 
 .add {
@@ -430,8 +413,6 @@
         </view>
       </view>
     </view>
-
-
     <view class="icon-wrapper">
       <image src="../assets/star.png" class="icon"></image>
       <image src="../assets/search.png" class="icon"></image>
@@ -518,7 +499,7 @@ export default class Homepage extends wepy.page{
         detail: '200字2图'
       },
       {
-        title: 'lajifor', 
+        title: 'lajifor',
         time: '12:30',
         ifstared: true,
         type: 1,
