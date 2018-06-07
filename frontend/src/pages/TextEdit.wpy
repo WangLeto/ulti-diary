@@ -7,15 +7,26 @@
   line-height: 75rpx;
   color: #666;
 }
+.content {
+  height: 100%;
+}
 </style>
 <template>
   <view class="main">
     <view class="top-bar">
-      <text class="statistics">{{wordsCount}}字 {{imagesCount}}图</text>
-      <image src="{{starImg}}" wx:if="{{!isSubmitted}}" @tap="star"></image>
-      <image src="../assets/ok.png" wx:if="{{isSubmitted}}"></image>
+      <text class="statistics">{{wordsCount}}字 {{imageCount}}图</text>
+      <image src="../assets/image.png" @tap="insertImage"></image>
+      <image src="{{starImg}}" wx:if="{{isSubmitted}}" @tap="star"></image>
+      <image src="../assets/ok.png" wx:if="{{!isSubmitted}}"></image>
       <image src="../assets/delete.png" @tap="del"></image>
     </view>
+    <scroll-view>
+      <view class="content" wx:for="{{content}}" wx:key="{{index}}">
+        <textarea wx:if="{{item.type == 0}}" value="{{item.content}}" auto-height @input="getInput({{index}})" focus="{{focused == index}}"></textarea>
+        <image wx:if="{{item.type == 1}}" src="{{item.content}}" class="img" @longpress="delImage({{index}})"></image>
+      </view>
+      <textarea value="{{temp}}" auto-focus @input="getInput(-1)"></textarea>
+    </scroll-view>
     <view class="below-panel">
 
     </view>
@@ -24,26 +35,106 @@
 <script>
 import wepy from 'wepy';
 import baseEdit from '../mixins/editBase';
+import _ from 'lodash';
 
 export default class TextEdit extends wepy.page {
   data = {
-    pageTitle: '图文日记'
+    pageTitle: '图文日记',
+    isSubmitted: false,
+    content: [],
+    temp: '',
+    imageCount: 0,
+    focused: -1,
   };
 
   components = {
   };
-
   computed = {
     wordsCount: function () {
-      return 0;
+      let num = 0;
+      _.forEach(this.content,function(e) {
+        if (e.type === 0) {
+          num += e.content.length;
+        }
+      });
+      num += this.temp.length;
+      return num;
     },
-    imagesCount: function () {
-      return 0;
-    }
+    starImg: function () {
+    },
   };
 
   mixins = [baseEdit];
 
-  methods = {};
+  methods = {
+    confirm: function (e) {
+
+    },
+    insertImage: function () {
+      if (this.temp != '') {
+        let tp = {};
+        tp.type = 0;
+        tp.content = this.temp;
+        this.temp = '';
+        this.$apply();
+        this.content.push(tp);
+      }
+      let temp = {};
+      temp.type = 1;
+      temp.content = '../assets/image.png';
+      this.content.push(temp);
+      this.imageCount += 1;
+      this.$apply();
+    },
+    delImage: function (index) {
+      wx.showActionSheet({
+        itemList: ['删除', '上增加一行', '下增加一行'],
+        success: (res) => {
+          if (res.tapIndex === 0) {
+            //删除图片
+            this.content.splice(index, 1);
+            this.imageCount -= 1;
+            this.$apply();
+            //表明删除的是最后一个
+            if (index === this.content.length && this.content[index - 1].type === 0) {
+              this.temp = this.content[index - 1].content + this.temp;
+              this.content.splice(index-1, 1);
+            } else if (this.content[index].type === 0 && this.content[index-1].type === 0) {
+              this.content[index].content = this.content[index-1].content + this.content[index].content;
+              this.content.splice(index-1, 1);
+            }
+            this.$apply();
+          } else if (res.tapIndex === 1) {
+            this.content.splice(index, 0, {type: 0, content: ''});
+            this.focused = index;
+          } else {
+            this.content.splice(index+1, 0, {type: 0, content: ''});
+            this.focused = index + 1;
+          }
+          this.$apply();
+        }
+      });
+    },
+    getInput: function(index,e) {
+      //传过来的index是字符串  真的傻逼
+      if(index == -1)
+      {
+        this.temp = e.detail.value;
+        if (e.detail.value === '' && this.content[this.content.length-1].type == 0)
+        {
+          this.temp = this.content[this.content.length-1].content;
+          this.content.splice(this.content.length-1, 1);
+          this.focused = -1;
+        }
+      } else {
+        this.content[index].content = e.detail.value;
+        if (e.detail.value === '' && this.content[index-1].type === 0) {
+          this.content.splice(index, 1);
+          this.focused = index - 1;
+        }
+        this.$apply();
+      }
+    }
+  };
 }
 </script>
