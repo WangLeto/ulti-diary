@@ -176,7 +176,7 @@ export default class AudioEdit extends wepy.page {
     recorderManager: wx.getRecorderManager(),
     currentTime: 0,
     microsecond: 0,
-    timePlusHandler: null,
+    timePlusHandler: 0,
     start: function () {
       tips.showTextToast('开始录音，最长时间10分钟');
       this.recorderManager.start({
@@ -195,6 +195,7 @@ export default class AudioEdit extends wepy.page {
     },
     stop: function () {
       this.recorderManager.stop();
+      this.global.recordTime = this.currentTime;
       let that = this.global;
       this.recorderManager.onStop(e => {
         that.player.init(e.tempFilePath);
@@ -217,11 +218,22 @@ export default class AudioEdit extends wepy.page {
     innerPlayer: null,
     currentTime: 0,
     microsecond: 0,
-    timePlusHandler: null,
+    timePlusHandler: 0,
+    isGetRealDuration: false,
     init: function (source) {
       this.innerPlayer = wx.createInnerAudioContext();
       this.innerPlayer.src = source;
-      this.getDuration();
+      let that = this;
+      // 不知道这句为什么有用，但是不能去掉，去了就出错
+      this.innerPlayer.onPlay(() => {});
+      this.innerPlayer.onTimeUpdate(() => {
+        if (!that.isGetRealDuration && that.innerPlayer.duration > 0) {
+          that.global.recordTime = that.innerPlayer.duration;
+          console.log(that.global.recordTime);
+          that.global.$apply();
+          that.isGetRealDuration = true;
+        }
+      });
     },
     play: function () {
       this.plusSecond();
@@ -248,31 +260,17 @@ export default class AudioEdit extends wepy.page {
         that.microsecond++;
         if (that.microsecond % 10 === 0) {
           that.currentTime = that.microsecond / 10;
+          if (that.currentTime === Math.ceil(that.global.recordTime)) {
+            tips.showTextToast('播放结束');
+            clearInterval(that.global.player.timePlusHandler);
+            that.currentTime = 0;
+            that.microsecond = 0;
+            that.global.state.current = WAIT_PLAY;
+          }
           that.global.$apply();
-        }
-      }, 100);
-    },
-    getDuration: function () {
-      let calcIndex = 0;
-      let p = this.innerPlayer;
-      let gl = this.global;
-      let calcTimer = setInterval(function () {
-        calcIndex++;
-        // 反复尝试仍获取失败，则取消尝试
-        if (calcIndex > 50) {
-          clearInterval(calcTimer);
-          tips.showError('小程序出错');
-        }
-        if (p.duration > 0) {
-          gl.recordTime = p.duration;
-          gl.$apply();
-          clearInterval(calcTimer);
         }
       }, 100);
     }
   };
-
-  onLoad () {
-  }
 }
 </script>
