@@ -24,6 +24,7 @@ const submitDiary = (params) => request(params, apiRoot + 'submitDiary');
 const submitStar = (params) => request(params, apiRoot + 'submitStar');
 const askSession = (params) => request(params, apiRoot + 'askSession');
 const submitRename = (params) => request(params, apiRoot + 'rename');
+// 图片、视频仅需 url；视频需要时长信息
 const queryDiary = (params) => request(params, apiRoot + 'queryDiary');
 
 module.exports = {

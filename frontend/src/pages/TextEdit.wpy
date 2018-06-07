@@ -1,20 +1,29 @@
-<style></style>
+<style>
+.statistics {
+  position: absolute;
+  left: 0;
+  margin-left: 20rpx;
+  font-size: 30rpx;
+  line-height: 75rpx;
+  color: #666;
+}
+</style>
 <template>
   <view class="main">
     <view class="top-bar">
+      <text class="statistics">{{wordsCount}}字 {{imagesCount}}图</text>
       <image src="{{starImg}}" wx:if="{{!isSubmitted}}" @tap="star"></image>
       <image src="../assets/ok.png" wx:if="{{isSubmitted}}"></image>
       <image src="../assets/delete.png" @tap="del"></image>
     </view>
     <view class="below-panel">
-      <titleEdit :name="name" :name.sync="name" wx:if="{{isSubmitted}}"></titleEdit>
+
     </view>
   </view>
 </template>
 <script>
 import wepy from 'wepy';
 import baseEdit from '../mixins/editBase';
-import TitleEdit from '../components/TitleEdit';
 
 export default class TextEdit extends wepy.page {
   data = {
@@ -22,12 +31,19 @@ export default class TextEdit extends wepy.page {
   };
 
   components = {
-    titleEdit: TitleEdit
+  };
+
+  computed = {
+    wordsCount: function () {
+      return 0;
+    },
+    imagesCount: function () {
+      return 0;
+    }
   };
 
   mixins = [baseEdit];
 
-  methods = {
-  };
+  methods = {};
 }
 </script>
