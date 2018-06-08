@@ -1,5 +1,47 @@
 <style>
   .weui-search-bar{position:relative;padding:8px 10px;display:-webkit-box;display:-webkit-flex;display:flex;box-sizing:border-box;background-color:#efeff4;border-top:1rpx solid #d7d6dc;border-bottom:1rpx solid #d7d6dc}.weui-icon-search{margin-right:8px;font-size:inherit}.weui-icon-search_in-box{position:absolute;left:10px;top:7px}.weui-search-bar__text{display:inline-block;font-size:14px;vertical-align:middle}.weui-search-bar__form{position:relative;-webkit-box-flex:1;-webkit-flex:auto;flex:auto;border-radius:5px;background:#fff;border:1rpx solid #e6e6ea}.weui-search-bar__box{position:relative;padding-left:30px;padding-right:30px;width:100%;box-sizing:border-box;z-index:1}.weui-search-bar__input{height:28px;line-height:28px;font-size:14px}.weui-icon-clear{position:absolute;top:0;right:0;padding:7px 8px;font-size:0}.weui-search-bar__label{position:absolute;top:0;right:0;bottom:0;left:0;z-index:2;border-radius:3px;text-align:center;color:#9b9b9b;background:#fff;line-height:28px}.weui-search-bar__cancel-btn{margin-left:10px;line-height:28px;color:#09bb07;white-space:nowrap}
+
+.cards {
+  height: 100%;
+}
+.card {
+  background:#fefefe;
+  color:#333;
+  box-shadow: 0 1rpx 10rpx #ccc;
+  margin: 30rpx 0 10rpx;
+}
+.primary {
+  display: flex;
+  height: 120rpx;
+  align-items: center;
+}
+.img {
+  height: 55rpx;
+  width: 55rpx;
+  padding-left: 30rpx;
+}
+.text {
+  margin-left: 40rpx;
+  font-size:32rpx;
+  color:#666;
+}
+.detail {
+  background-color: #e2f8ff;
+  font-size:24rpx;
+  color:#666;
+  padding:3px 20rpx;
+  display:flex;
+  justify-content:space-between;
+}
+.star {
+  height: 40rpx;
+  width: 40rpx;
+}
+.star-wrapper {
+  position: absolute;
+  right: 10rpx;
+  margin-top: 20rpx;
+}
 </style>
 <template>
   <view class="page">
@@ -13,34 +55,26 @@
               <icon type="clear" size="14"></icon>
             </view>
           </view>
-          <label class="weui-search-bar__label" hidden="{{inputShowed}}" bindtap="showInput">
-            <icon class="weui-icon-search" type="search" size="14"></icon>
-            <view class="weui-search-bar__text">搜索</view>
-          </label>
         </view>
         <view class="weui-search-bar__cancel-btn" bindtap="hideInput">确定</view>
       </view>
       <view class="weui-cells searchbar-result" wx:if="{{inputVal.length > 0}}">
-        <navigator url="" class="weui-cell" hover-class="weui-cell_active">
-          <view class="weui-cell__bd">
-            <view>实时搜索文本</view>
+        <!--日记detail-->
+        <scroll-view class="cards" scroll-y scroll-top="100">
+          <view class="card" wx:for="{{diarys}}" wx:key="{{index}}" data-idx="{{index}}">
+            <view wx:if="{{item.ifstared}}" class="star-wrapper">
+              <image src="../assets/star-color.png" mode="aspectFit" class="star"></image>
+            </view>
+            <view class="primary">
+              <image src="{{'../assets/' + alltype[item.type]}}" mode="aspectFit" class="img"></image>
+              <text class="text">{{item.title}}</text>
+            </view>
+            <view class="detail">
+              <text>{{item.time}}</text>
+              <text class="diary-detail">{{item.detail}}</text>
+            </view>
           </view>
-        </navigator>
-        <navigator url="" class="weui-cell" hover-class="weui-cell_active">
-          <view class="weui-cell__bd">
-            <view>实时搜索文本</view>
-          </view>
-        </navigator>
-        <navigator url="" class="weui-cell" hover-class="weui-cell_active">
-          <view class="weui-cell__bd">
-            <view>实时搜索文本</view>
-          </view>
-        </navigator>
-        <navigator url="" class="weui-cell" hover-class="weui-cell_active">
-          <view class="weui-cell__bd">
-            <view>实时搜索文本</view>
-          </view>
-        </navigator>
+        </scroll-view>
       </view>
     </view>
   </view>
@@ -52,13 +86,36 @@ export default class Stars extends wepy.page{
   data = {
     inputShowed: true,
     inputVal: "",
+    diarys: [
+      {
+        title: 'hehe',
+        time: '12:40',
+        ifstared: false,
+        type: 0,
+        detail: '200字2图'
+      },
+      {
+        title: 'lajifor',
+        time: '12:30',
+        ifstared: true,
+        type: 1,
+        detail: '3\'19\''
+      },
+      {
+        title: 'zhendelaji',
+        time: '11:11',
+        ifstared: false,
+        type: 2,
+        detail: '1\'20\''
+      },
+    ],
+    alltype: ['text.png', 'audio.png', 'video.png'],
   };
   methods = {
     showInput() {
       this.inputShowed = true;
     },
     hideInput() {
-      this.inputVal = "";
       this.inputShowed = false;
     },
     clearInput() {

@@ -44,9 +44,9 @@ textarea {
         <textarea wx:if="{{item.type == 0}}" value="{{item.content}}" auto-height maxlength="-1" cursor-spacing="30"
                   @input="getInput({{index}})" focus="{{focused == index}}"></textarea>
         <image wx:if="{{item.type == 1}}" src="{{item.content}}" class="img" @tap="previewImage({{index}})"
-               @longpress="delImage({{index}})"></image>
+               @longpress="delImage({{index}})" mode="aspectFit"></image>
       </view>
-      <textarea value="{{temp}}" auto-focus auto-height @input="getInput(-1)"
+      <textarea value="{{temp}}" focus="{{focused == -1}}" auto-height @input="getInput(-1)"
                 maxlength="-1" cursor-spacing="30"></textarea>
     </view>
   </view>
@@ -132,9 +132,11 @@ export default class TextEdit extends wepy.page {
             this.imageCount -= 1;
             this.$apply();
             //表明删除的是最后一个
-            if (index === this.content.length && this.content[index - 1].type === 0) {
-              this.temp = this.content[index - 1].content + this.temp;
-              this.content.splice(index-1, 1);
+            if (index === this.content.length) {
+              if (index !== 0 && this.content[index - 1].type === 0) {
+                this.temp = this.content[index - 1].content + this.temp;
+                this.content.splice(index-1, 1);
+              }
             } else if (this.content[index].type === 0 && this.content[index-1].type === 0) {
               this.content[index].content = this.content[index-1].content + this.content[index].content;
               this.content.splice(index-1, 1);
@@ -156,14 +158,14 @@ export default class TextEdit extends wepy.page {
       if(index == -1)
       {
         this.temp = e.detail.value;
-        if (e.detail.value === '' && this.content[this.content.length-1].type == 0)
-        {
+        if (e.detail.value === '' && this.content.length !== 0 && this.content[this.content.length-1].type == 0) {
           this.temp = this.content[this.content.length-1].content;
           this.content.splice(this.content.length-1, 1);
           this.focused = -1;
         }
       } else {
         this.content[index].content = e.detail.value;
+        this.focused = index;
         if (e.detail.value === '' && this.content[index-1].type === 0) {
           this.content.splice(index, 1);
           this.focused = index - 1;
