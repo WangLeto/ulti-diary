@@ -36,18 +36,18 @@ textarea {
       <text class="statistics">{{wordsCount}}字 {{imageCount}}图</text>
       <image src="../assets/image.png" @tap="insertImage"></image>
       <image src="{{starImg}}" wx:if="{{isSubmitted}}" @tap="star"></image>
-      <image src="../assets/ok.png" wx:if="{{!isSubmitted}}"></image>
+      <image src="../assets/ok.png" wx:if="{{!isSubmitted}}" @tap="submitLastOnePaunch"></image>
       <image src="../assets/delete.png" @tap="del"></image>
     </view>
     <view class="below-panel">
       <view class="content" wx:for="{{content}}" wx:key="{{index}}">
         <textarea wx:if="{{item.type == 0}}" value="{{item.content}}" auto-height maxlength="-1" cursor-spacing="30"
-                  @input="getInput({{index}})" focus="{{focused == index}}"></textarea>
+                  @input="getInput({{index}})" focus="{{focused == index}}" disabled="{{isSubmitted}}"></textarea>
         <image wx:if="{{item.type == 1}}" src="{{item.content}}" class="img" @tap="previewImage({{index}})"
                @longpress="delImage({{index}})" mode="aspectFit"></image>
       </view>
       <textarea value="{{temp}}" focus="{{focused == -1}}" auto-height @input="getInput(-1)"
-                maxlength="-1" cursor-spacing="30"></textarea>
+                maxlength="-1" cursor-spacing="30" wx:if="{{!isSubmitted}}"></textarea>
     </view>
   </view>
 </template>
@@ -56,6 +56,7 @@ import wepy from 'wepy';
 import baseEdit from '../mixins/editBase';
 import _ from 'lodash';
 import {tips} from '../utils/tips';
+import {queryDiary, uploadFile, apiRoot} from '../api/api';
 
 export default class TextEdit extends wepy.page {
   data = {
@@ -65,21 +66,30 @@ export default class TextEdit extends wepy.page {
     temp: '',
     imageCount: 0,
     focused: -1,
-    imageOperateTipped: false
+    imageOperateTipped: false,
+    //如果是查看日记就为日记的id
+    id: -1,
+    type: 1,
+    detail: '',
   };
 
   components = {
   };
+  tpcount() {
+    let num = 0;
+    _.forEach(this.content,function(e) {
+      if (e.type === 0) {
+        num += e.content.length;
+      }
+    });
+    if (this.temp) {
+      num += this.temp.length;
+    }
+    return num;
+  };
   computed = {
     wordsCount: function () {
-      let num = 0;
-      _.forEach(this.content,function(e) {
-        if (e.type === 0) {
-          num += e.content.length;
-        }
-      });
-      num += this.temp.length;
-      return num;
+      return this.tpcount();
     },
     starImg: function () {
     },
@@ -115,12 +125,41 @@ export default class TextEdit extends wepy.page {
         this.$apply();
         this.content.push(tp);
       }
-      let temp = {};
-      temp.type = 1;
-      temp.content = '../assets/image.png';
-      this.content.push(temp);
-      this.imageCount += 1;
-      this.$apply();
+      let token = wepy.$instance.globalData.session;
+      let that = this;
+      wx.chooseImage({
+        count: 1,
+        sizeType: ['compressed'],
+        success: function(res) {
+          console.log(res);
+          let tempFilePath = res.tempFilePaths[0];
+          wx.uploadFile({
+            url: apiRoot + '/uploadFile',
+            filePath: tempFilePath,
+            name: 'file',
+            header: {
+              token: token
+            },
+            success: function(r) {
+              console.log(r);
+              if (r.statusCode === 200) {
+                r.data = JSON.parse(r.data);
+                let temp = apiRoot + r.data['path'];
+                let obj = {};
+                obj.content = temp;
+                obj.type = 1;
+                console.log(obj);
+                that.content.push(obj);
+                that.imageCount += 1;
+                that.$apply();
+              }
+            }
+          })
+        },
+        fail: function(res) {
+          console.log(res);
+        }
+      })
     },
     delImage: function (index) {
       wx.showActionSheet({
@@ -172,7 +211,37 @@ export default class TextEdit extends wepy.page {
         }
         this.$apply();
       }
+    },
+  };
+
+  async getDiary(id) {
+    let res = await queryDiary({
+      data: {id: id},
+    });
+    console.log(res);
+    if (res.statusCode === 200) {
+      let data = JSON.parse(res.data);
+      this.content = JSON.parse(data.content);
     }
   };
+  packSubmitData = function () {
+    // content 转换为字符串
+    if (this.temp !== '') {
+      let obj = {content: this.temp, type: 0};
+      this.content.push(obj);
+      this.temp = '';
+    }
+    this.$apply();
+    this.detail = this.tpcount() + '字 ' + this.imageCount + '图';
+    console.log('?????' + this.detail);
+    this.finalContent = JSON.stringify(this.content);
+  };
+  onLoad(params) {
+    if (params.id) {
+      this.id = id;
+      this.isSubmitted = true;
+      this.getDiary(id);
+    }
+  }
 }
 </script>

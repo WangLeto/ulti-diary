@@ -10,7 +10,7 @@ export default class testMixin extends wepy.mixin {
     isStared: false,
     id: null,
     name: null,
-    rawData: null
+    finalContent: null
   };
 
   computed = {
@@ -46,23 +46,30 @@ export default class testMixin extends wepy.mixin {
         }
       });
     },
-    submit: async function () {
-      let submitData = this.packSubmitData();
+    // 最终提交 
+    submitLastOnePaunch: async function () {
+      this.packSubmitData();
+      let title = this.name;
+      let type = this.type;
+      let content = this.finalContent;
+      let detail = this.detail;
+      let data = {
+        title: title,
+        type: type,
+        content: content,
+        detail: detail,
+      };
+      console.log(data);
       let result = await submitDiary({
-        data: {
-          blob: submitData
-        }
+        data: data, 
       });
       console.log(result);
       if (result.statusCode === 200) {
         this.id = result.data;
         tips.showOk('上传成功');
+        wx.navigateBack();
       }
     }
-  };
-
-  packSubmitData = function () {
-    return null;
   };
 
   onLoad(params) {
@@ -86,7 +93,7 @@ export default class testMixin extends wepy.mixin {
       }
     });
     if (result.statusCode === 200) {
-      this.rawData = result.data;
+      // this.finalContent = result.data;
     }
   };
 
