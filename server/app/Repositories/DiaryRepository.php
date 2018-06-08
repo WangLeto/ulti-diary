@@ -25,12 +25,13 @@ class DiaryRepository
         $user = \JWTAuth::user();
 
         $this->model->user = $user->getAttribute($user->getKeyName());
-        $this->model->title = $model->title;
-        $this->model->type = $model->type;
-        $this->model->content = $model->content;
+        $this->model->title = $model['title'];
+        $this->model->type = $model['type'];
+        $this->model->content = $model['content'];
+        $this->model->detail = $model['detail'];
         $this->model->star = 0;
-        $this->model->create_at = time();
-        $this->model->update_at = time();
+        $this->model->create_at = date('Y-m-d H:m:s', time());
+        $this->model->update_at = date('Y-m-d H:m:s', time());
         $this->model->save();
 
         return $this->getById($this->model->getAttribute($this->model->getKeyName()));
@@ -48,22 +49,77 @@ class DiaryRepository
     }
 
     /**
-     * Get number of the records.
+     * Get the day with records.
      *
      * @param  array $parameters
-     * @return Paginate
+     * @return Array
      */
-    public function page($parameters)
+    public function getDayHasRecord($parameters)
     {
-        $builder = $this->model->getInitModel($parameters['search_key']);
+        $user = \JWTAuth::user();
 
-        $this->isNull($parameters['category_id']) || $parameters['category_id'] === -1 || $builder = $builder->where($this->model->getTable().".category_id", "=", $parameters['category_id']);
-        $this->isNull($parameters['closed']) || $parameters['closed'] === -1 || $builder = $builder->where($this->model->getTable().".closed", "=", $parameters['closed']);
-        $this->isNull($parameters['start_time']) || $builder = $builder->where("publish_time", ">=", $parameters['start_time']);
-        $this->isNull($parameters['end_time']) || $builder = $builder->where("publish_time", "<=", $parameters['end_time']);
+        $timezone = new \DateTimeZone(config('app.timezone', 'PRC'));
+        if (!$this->isNull($parameters['year']) && !$this->isNull($parameters['month'])) {
+            $beginTime = new \DateTime($parameters['year'].'-'.$parameters['month'].'-01 00:00:00', $timezone);
+            $endTime = (new \DateTime($parameters['year'].'-'.$parameters['month'].'-01 00:00:00', $timezone))->add(new \DateInterval('P1M'));
+        } else if (!$this->isNull($parameters['year'])) {
+            $beginTime = new \DateTime($parameters['year'].'-01-01 00:00:00', $timezone);
+            $endTime = (new \DateTime($parameters['year'].'-01-01 00:00:00', $timezone))->add(new \DateInterval('P1Y'));
+        }
 
-        $builder = $this->isNull($parameters['sort_column'])? $builder->orderBy('create_at', 'desc'): $builder->orderBy($parameters['sort_column'], $parameters['sort']);
-        return $builder->paginate($parameters['limit'], ['*'], 'current');
+        $builder = $this->model->where('user', '=', $user->getAttribute($user->getKeyName()));
+        $this->isNull($beginTime) || $builder = $builder->where('create_at', '>=', $beginTime->format('Y-m-d H:m:s'));
+        $this->isNull($endTime) || $builder = $builder->where('create_at', '<', $endTime->format('Y-m-d H:m:s'));
+
+        return $builder->groupBy(\DB::raw('DATE_FORMAT(create_at, "%Y-%m-%d")'))->select(\DB::raw('DATE_FORMAT(create_at, "%Y-%m-%d") AS day'))->pluck('day');
+    }
+
+    /**
+     * Get records.
+     *
+     * @param  array $parameters
+     * @return Array
+     */
+    public function getList($parameters)
+    {
+        $user = \JWTAuth::user();
+
+        $timezone = new \DateTimeZone(config('app.timezone', 'PRC'));
+        if (!$this->isNull($parameters['year']) && !$this->isNull($parameters['month']) && !$this->isNull($parameters['day'])) {
+            $beginTime = new \DateTime($parameters['year'].'-'.$parameters['month'].'-'.$parameters['day'].' 00:00:00', $timezone);
+            $endTime = (new \DateTime($parameters['year'].'-'.$parameters['month'].'-'.$parameters['day'].' 00:00:00', $timezone))->add(new \DateInterval('P1D'));
+        } else if (!$this->isNull($parameters['year']) && !$this->isNull($parameters['month'])) {
+            $beginTime = new \DateTime($parameters['year'].'-'.$parameters['month'].'-01 00:00:00', $timezone);
+            $endTime = (new \DateTime($parameters['year'].'-'.$parameters['month'].'-01 00:00:00', $timezone))->add(new \DateInterval('P1M'));
+        } else if (!$this->isNull($parameters['year'])) {
+            $beginTime = new \DateTime($parameters['year'].'-01-01 00:00:00', $timezone);
+            $endTime = (new \DateTime($parameters['year'].'-01-01 00:00:00', $timezone))->add(new \DateInterval('P1Y'));
+        }
+
+        $builder = $this->model->where('user', '=', $user->getAttribute($user->getKeyName()));
+        $this->isNull($beginTime) || $builder = $builder->where('create_at', '>=', $beginTime->format('Y-m-d H:m:s'));
+        $this->isNull($endTime) || $builder = $builder->where('create_at', '<', $endTime->format('Y-m-d H:m:s'));
+
+        return $builder->groupBy(\DB::raw('DATE_FORMAT(create_at, "%Y-%m-%d")'))->get();
+    }
+
+    /**
+     * Get records.
+     *
+     * @param  array $parameters
+     * @return
+     */
+    public function search($parameters)
+    {
+        $user = \JWTAuth::user();
+        $builder = $this->model->where('user', '=', $user->getAttribute($user->getKeyName()));
+
+        $this->isNull($parameters['searchKey']) || $builder = $builder->whereRaw("CONCAT(IFNULL(title,''),',',IFNULL(content,'')) like '%".$parameters['searchKey']."%'");
+        $this->isNull($parameters['isStar']) || $parameters['isStar'] == -1 || $builder = $builder->where("star", "=", $parameters['isStar']);
+
+        $builder = $this->isNull($parameters['sortColumn'])? $builder->orderBy('create_at', 'desc'): $builder->orderBy($parameters['sortColumn'], $parameters['sort']);
+        $builder = $builder->offset($parameters['offset'])->limit($parameters['limit']);
+        return [ 'list' => $builder->get(), 'total' => $builder->count() ];
     }
 
     /**
@@ -77,7 +133,7 @@ class DiaryRepository
     {
         $this->model = $this->model->findOrFail($id);
         $this->model->star = $state;
-        $this->model->update_at = time();
+        $this->model->update_at = date('Y-m-d H:m:s', time());
         $this->model->save();
 
         return $this->getById($id);
@@ -94,7 +150,7 @@ class DiaryRepository
     {
         $this->model = $this->model->findOrFail($id);
         $this->model->title = $name;
-        $this->model->update_at = time();
+        $this->model->update_at = date('Y-m-d H:m:s', time());
         $this->model->save();
 
         return $this->getById($id);
