@@ -17,6 +17,32 @@ class DiaryController extends Controller
         $this->diaryRepository = $diaryRepository;
     }
 
+    public function getDayHasDiary(Request $request)
+    {
+        $this->validate($request, [
+            'year' => 'required|integer|min:1'
+        ]);
+
+        try {
+            return $this->response->success($this->diaryRepository->getDayHasRecord($request->all()));
+        } catch (Exception $e) {
+            return $this->response->withBadRequest($e->getMessage());
+        }
+    }
+
+    public function getDiaryList(Request $request)
+    {
+        $this->validate($request, [
+            'year' => 'required|integer|min:1'
+        ]);
+
+        try {
+            return $this->response->success($this->diaryRepository->getList($request->all()));
+        } catch (Exception $e) {
+            return $this->response->withBadRequest($e->getMessage());
+        }
+    }
+
     public function queryDiary(Request $request)
     {
         $this->validate($request, [
@@ -30,6 +56,22 @@ class DiaryController extends Controller
         }
     }
 
+    public function searchDiary(Request $request)
+    {
+        $this->validate($request, [
+            'offset' => 'required|integer|min:0',
+            'limit' => 'required|integer|min:0',
+            'searchKey' => 'string',
+            'isStar' => 'integer'
+        ]);
+
+        try {
+            return $this->response->success($this->diaryRepository->search($request->all()));
+        } catch (Exception $e) {
+            return $this->response->withBadRequest($e->getMessage());
+        }
+    }
+    
     public function submitDiary(Request $request)
     {
         $this->validate($request, [
@@ -37,7 +79,7 @@ class DiaryController extends Controller
         ]);
 
         try {
-            return $this->response->success($this->diaryRepository->add($request));
+            return $this->response->success($this->diaryRepository->add($request->all()));
         } catch (Exception $e) {
             return $this->response->withBadRequest($e->getMessage());
         }
