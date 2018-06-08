@@ -22,11 +22,6 @@ class UserRepository
      */
     public function getById($openid)
     {
-        if (is_null($user = $this->model->find($openid))) {
-            $user = $this->model->newInstance();
-            $user->openid = $openid;
-            $user->save();
-        }
-        return $this->model->findOrFail($openid);
+        return $this->model->firstOrCreate([ 'openid' => $openid ]);
     }
 }

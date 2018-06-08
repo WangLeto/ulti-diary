@@ -9,9 +9,16 @@ class User extends Authenticatable implements JWTSubject
 {
     protected $table = 'user';
 
-    protected $primaryKey = 'openid';
-
     public $timestamps = false;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'openid'
+    ];
 
 	/**
      * Get the identifier that will be stored in the subject claim of the JWT.

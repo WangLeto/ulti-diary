@@ -13,8 +13,6 @@
 
 Route::group([], function() {
 	Route::post('askSession', 'AuthController@askSession');
-	
-	Route::post('uploadFile', 'DiaryController@uploadFile');
 });
 
 Route::group(['middleware' => 'jwt.auth'], function() {
@@ -25,4 +23,5 @@ Route::group(['middleware' => 'jwt.auth'], function() {
 	Route::post('submitDiary', 'DiaryController@submitDiary');
 	Route::post('submitRename', 'DiaryController@submitRename');
 	Route::post('submitStar', 'DiaryController@submitStar');
+	Route::post('uploadFile', 'DiaryController@uploadFile');
 });

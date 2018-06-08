@@ -94,6 +94,7 @@
   "title": "日记1",
   "type": 1,
   "content": "",
+  "detail": "",
   "star": 0,
   "create_at": "2018-06-08 16:06:48",
   "update_at": "2018-06-08 16:06:48"
@@ -122,6 +123,7 @@
 | title   | String  | 标题              |
 | type    | Integer | 类型（1图文、2音频、3视频） |
 | content | String  | 内容              |
+| detail  | String  | 详情              |
 
 * 返回结果示例
 
@@ -131,6 +133,7 @@
   "title": "日记1",
   "type": 1,
   "content": "",
+  "detail": "",
   "star": 0,
   "create_at": "2018-06-08 16:06:48",
   "update_at": "2018-06-08 16:06:48"
@@ -203,6 +206,7 @@
   "title": "日记1",
   "type": 1,
   "content": "",
+  "detail": "",
   "star": 0,
   "create_at": "2018-06-08 16:06:48",
   "update_at": "2018-06-08 16:06:48"
