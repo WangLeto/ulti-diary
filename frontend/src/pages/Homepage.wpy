@@ -1,6 +1,6 @@
 <style>
-  page {
-  background-color: #fff;
+page {
+  background-color: #F7F9F7;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -21,6 +21,8 @@
 
 .box-tb {
   flex-direction: column;
+  margin-top: 20rpx;
+  background: #fff;
 }
 
 .box-bt {
@@ -88,45 +90,22 @@
   flex-grow: 1;
 }
 
-.shrink {
-  flex-shrink: 1;
-}
-
-.bg {
-  background-image: linear-gradient(to bottom, #faefe7, #ffcbd7);
-  overflow: hidden;
-}
-
-.brown-color {
-  color: #784344;
-}
-
 .pink-color {
-  color: #ff629a;
+  color: #666;
 }
 
 .white-color {
   color: #fff;
 }
 
-.fs24 {
-  font-size: 24rpx;
-}
 
 .fs28 {
   font-size: 28rpx;
 }
 
-.fs32 {
-  font-size: 32rpx;
-}
-
-.fs36 {
-  font-size: 36rpx;
-}
-
 .top-handle {
   height: 80rpx;
+  margin-top: -20rpx;
 }
 
 .prev {
@@ -175,7 +154,7 @@
 .day {
   width: 60rpx;
   height: 60rpx;
-  color: #88d2ac;
+  color: #101010;
   font-size: 26rpx;
   font-weight: 200;
 }
@@ -189,11 +168,7 @@
 }
 
 .pink-bg {
-  background-color: #ff629a;
-}
-
-.purple-bg {
-  background-color: #b8b8f1;
+  background-color: #FF9800;
 }
 
 .right-triangle::after {
@@ -291,96 +266,108 @@
   text-align: center;
 }
 .has-diary {
-  width: 10rpx;
-  height: 10rpx;
-  background: red;
-  -moz-border-radius: 5rpx;
-  -webkit-border-radius: 5rpx;
-  border-radius: 5rpx;
+  width: 20rpx;
+  height: 20rpx;
+  background: #dcf5eb;
+  border-radius: 10rpx;
   position: absolute;
-  bottom: 5rpx;
+  bottom: 0;
 }
 .riqi {
   position: relative;
 }
 .cards {
-  height: 400rpx;
+  height: 470rpx;
 }
 .card {
-  border:#909090 1px solid;
-  background:#fff;
+  background:#fefefe;
   color:#333;
-  -moz-box-shadow: 2px 2px 10px #909090;
-  -webkit-box-shadow: 2px 2px 10px #909090;
-  box-shadow:2px 2px 10px #909090;
+  box-shadow: 0 1rpx 10rpx #ccc;
+  margin: 30rpx 0 10rpx;
 }
 .primary {
-  margin-bottom: 40rpx;
   display: flex;
-  padding-top: 20rpx;
+  height: 120rpx;
+  align-items: center;
 }
 .img {
-  height: 50rpx;
-  width: 50rpx;
+  height: 55rpx;
+  width: 55rpx;
+  padding-left: 30rpx;
 }
 .text {
-  margin-left: 10rpx;
+  margin-left: 40rpx;
+  font-size:32rpx;
+  color:#666;
 }
 .detail {
-  background-color: #BFEFFF;
+  background-color: #e2f8ff;
+  font-size:24rpx;
+  color:#666;
+  padding:3px 20rpx;
+  display:flex;
+  justify-content:space-between;
 }
 .star {
-  height: 30rpx;
-  width: 30rpx;
+  height: 40rpx;
+  width: 40rpx;
 }
 .star-wrapper {
   position: absolute;
-  right: 0rpx;
-}
-.diary-detail {
-  position: absolute;
-  right: 0rpx;
+  right: 10rpx;
+  margin-top: 20rpx;
 }
 .icon {
-  width: 45rpx;
-  height: 45rpx;
+  width:60rpx;
+  height:60rpx;
   float: right;
+  padding:20rpx 0 0 20rpx;
 }
 .icon-wrapper {
-  margin-bottom: 40rpx;
+  background:#fff;
+  height:100rpx;
+  padding-right:15px;
+  box-shadow:0 30rpx 30rpx 1rpx rgba(0,0,0,0.15);
+  z-index: 1;
 }
 
 .add {
   position: fixed;
   right: 70rpx;
-  bottom: 0rpx;
-  width: 60rpx;
-  height: 60rpx;
-  background-color: #006400;
+  bottom: 70rpx;
+  width: 80rpx;
+  height: 80rpx;
   border-radius:50%;
+  background-color: #009688;
+  box-shadow: 10rpx 10rpx 20rpx 2rpx rgba(0,0,0,0.3);
   padding: 25rpx;
   z-index: 20;
 }
 .smbtn {
   position: fixed;
-  right: 85rpx;
-  bottom: 15rpx;
-  width: 40rpx;
-  height: 40rpx;
-  background-color: #006400;
+  right: 78rpx;
+  bottom: 70rpx;
+  width: 50rpx;
+  height: 50rpx;
   border-radius:50%;
+  background-color: #009688;
+  box-shadow: 8rpx 8rpx 14rpx 1rpx rgba(0,0,0,0.3);
   padding: 20rpx;
   z-index: 10;
 }
 .smtext {
   position: fixed;
-  right: 190rpx;
-  bottom: 30rpx;
+  right: 220rpx;
+  bottom: 90rpx;
+  font-size: 30rpx;
+  color: #666;
 }
 .tuwen {
   position: fixed;
-  bottom: 30rpx;
-  right: 190rpx;
+  bottom: 100rpx;
+  right: 220rpx;
+  font-size: 30rpx;
+  color: #666;
 }
 .all {
   position: absolute;
@@ -430,11 +417,9 @@
         </view>
       </view>
     </view>
-
-
     <view class="icon-wrapper">
-      <image src="../assets/star.png" class="icon"></image>
-      <image src="../assets/search.png" class="icon"></image>
+      <image src="../assets/star.png" class="icon" @tap="goStarPage"></image>
+      <image src="../assets/search.png" class="icon" @tap="goSearchPage"></image>
     </view>
     <!--日记detail-->
     <scroll-view class="cards" scroll-y scroll-top="100">
@@ -458,11 +443,11 @@
     <text class="tuwen">普通图文</text>
     <view animation="{{audioAnimation}}">
       <text class="smtext">录音</text>
-      <image src="../assets/create-audio.png" class="smbtn"></image>
+      <image src="../assets/create-audio.png" class="smbtn" @tap="goAudioPage"></image>
     </view>
     <view animation="{{videoAnimation}}">
       <text class="smtext">短视频</text>
-      <image src="../assets/create-video.png" class="smbtn"></image>
+      <image src="../assets/create-video.png" class="smbtn" @tap="goVideoPage"></image>
     </view>
   </view>
 
@@ -518,7 +503,7 @@ export default class Homepage extends wepy.page{
         detail: '200字2图'
       },
       {
-        title: 'lajifor', 
+        title: 'lajifor',
         time: '12:30',
         ifstared: true,
         type: 1,
@@ -533,7 +518,7 @@ export default class Homepage extends wepy.page{
       }
     ],
     alltype: ['text.png', 'audio.png', 'video.png'],
-  }
+  };
   getThisMonthDays(year, month) {
     return new Date(year, month, 0).getDate();
   };
@@ -646,12 +631,13 @@ export default class Homepage extends wepy.page{
         this.btnimg = '../assets/create-text.png';
         this.$apply();
         let audioAnimation = wx.createAnimation({timingFunction: 'ease', duration: 400});
-        this.audioAnimation = audioAnimation.translateY(-45).step().export();
+        this.audioAnimation = audioAnimation.opacity(1).translateY(-90).step().export();
         this.$apply();
-        let videoAnimation = wx.createAnimation({timingFunction: 'ease', duration: 400});
-        this.videoAnimation = videoAnimation.translateY(-85).step().export();
+        let videoAnimation = wx.createAnimation({timingFunction: 'ease', duration: 450});
+        this.videoAnimation = videoAnimation.opacity(1).translateY(-155).step().export();
         this.$apply();
       } else {
+        this.methods.goTextPage();
         this.btnimg = '../assets/add-diary.png';
       }
     },
@@ -659,10 +645,10 @@ export default class Homepage extends wepy.page{
       if (this.checkstate === 1) {
         this.$apply();
         let audioAnimation = wx.createAnimation({timingFunction: 'ease', duration: 400});
-        this.audioAnimation = audioAnimation.translateY(45).step().export();
+        this.audioAnimation = audioAnimation.opacity(0).translateY(-10).step().export();
         this.$apply();
-        let videoAnimation = wx.createAnimation({timingFunction: 'ease', duration: 400});
-        this.videoAnimation = videoAnimation.translateY(85).step().export();
+        let videoAnimation = wx.createAnimation({timingFunction: 'ease', duration: 450});
+        this.videoAnimation = videoAnimation.opacity(0).translateY(-10).step().export();
         this.$apply();
       }
       setTimeout(()=>{
@@ -670,6 +656,43 @@ export default class Homepage extends wepy.page{
         this.btnimg = '../assets/add-diary.png';
         this.$apply();
       }, 300);
+    },
+    goStarPage() {
+      wepy.navigateTo({
+        url: 'Stars'
+      });
+    },
+    goSearchPage() {
+      wepy.navigateTo({
+        url: 'SearchPage'
+      });
+    },
+    goTextPage(e) {
+      let id = '';
+      if (e) {
+        id = e.currentTarget.id;
+      }
+      wepy.navigateTo({
+        url: 'TextEdit?id=' + id
+      });
+    },
+    goAudioPage(e) {
+      let id = '';
+      if (e) {
+        id = e.currentTarget.id;
+      }
+      wepy.navigateTo({
+        url: 'AudioEdit?id=' + id
+      });
+    },
+    goVideoPage(e) {
+      let id = '';
+      if (e) {
+        id = e.currentTarget.id;
+      }
+      wepy.navigateTo({
+        url: 'VideoEdit?id=' + id
+      });
     }
   };
   computed = {
@@ -680,7 +703,7 @@ export default class Homepage extends wepy.page{
         return '';
       }
     }
-  }
+  };
   onLoad() {
     const date = new Date();
     const curYear = date.getFullYear();
