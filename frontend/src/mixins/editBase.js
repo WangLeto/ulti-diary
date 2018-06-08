@@ -57,8 +57,6 @@ export default class testMixin extends wepy.mixin {
       if (result.statusCode === 200) {
         this.id = result.data;
         tips.showOk('上传成功');
-      } else {
-        tips.showError('上传失败');
       }
     }
   };
@@ -89,8 +87,6 @@ export default class testMixin extends wepy.mixin {
     });
     if (result.statusCode === 200) {
       this.rawData = result.data;
-    } else {
-      tips.showError('获取日记失败！');
     }
   };
 

@@ -45,7 +45,7 @@
   <view class="main">
     <view class="top-bar">
       <image src="{{starImg}}" wx:if="{{!isSubmitted}}" @tap="star"></image>
-      <image src="../assets/ok.png" wx:if="{{isSubmitted}}" @tap="submit"></image>
+      <image src="../assets/ok.png" wx:if="{{showUploadBtn}}" @tap="submit"></image>
       <image src="../assets/delete.png" @tap="del"></image>
     </view>
     <view class="below-panel">
@@ -66,6 +66,7 @@ import wepy from 'wepy';
 import baseEdit from '../mixins/editBase';
 import TitleEdit from '../components/TitleEdit';
 import {tips} from '../utils/tips';
+import {uploadFile, apiRoot} from '../api/api';
 
 const WAIT_RECORD = 0, RECORDING = 1, RECORD_PAUSE = 2, WAIT_PLAY = 3, PLAYING = 4, PLAY_PAUSE = 5;
 export default class AudioEdit extends wepy.page {
@@ -106,6 +107,9 @@ export default class AudioEdit extends wepy.page {
     },
     showTotalTime: function () {
       return !!this.id || this.recordTime !== 0;
+    },
+    showUploadBtn: function () {
+      return !this.submitted && (this.recordTime !== 0);
     }
   };
 
@@ -144,6 +148,12 @@ export default class AudioEdit extends wepy.page {
       this.recorder.stop();
       this.state.current = WAIT_PLAY;
       this.hideSideBtn();
+    },
+    submit: async function () {
+      // 先上传静态文件，然后在 baseEdit 中上传日记信息
+      let filePath = this.player.innerPlayer.src;
+      let r = await uploadFile(filePath);
+      console.log(r);
     }
   };
 

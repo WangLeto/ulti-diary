@@ -16,12 +16,8 @@
 <script>
 import wepy from 'wepy'
 import 'wepy-async-function'
-
-import {setStore} from 'wepy-redux'
-import configStore from './store'
-
-const store = configStore();
-setStore(store);
+import {askSession} from './api/api';
+import {tips} from './utils/tips';
 
 export default class extends wepy.app {
   config = {
@@ -60,15 +56,41 @@ export default class extends wepy.app {
         return p;
       },
       async complete (p) {
+        tips.hideLoading();
         // 401 无 session 或 session 过期
         if (p.statusCode === 401) {
-
+          this.getSession();
+        } else if (p.statusCode === 400) {
+          tips.showError('出错了！');
         }
       }
     });
   }
 
   onLaunch() {
+    this.readSession();
+  }
+
+  readSession() {
+    // 读取 session
+    let session = wx.getStorageSync('session');
+    if (!session) {
+      this.getSession();
+    } else {
+      this.globalData.session = session;
+    }
+  }
+
+  async getSession() {
+    // 请求 session 并保存
+    let code = (await wepy.login()).code;
+    let session = (await askSession({
+      data: {
+        code: code
+      }
+    })).data.token;
+    wx.setStorageSync('session', session);
+    this.globalData.session = session;
   }
 }
 </script>
