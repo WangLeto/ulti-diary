@@ -1,12 +1,10 @@
 import wepy from 'wepy';
-import {submitDiary, submitStar, queryDiary} from '../api/api';
+import {submitDiary, submitStar, queryDiary, } from '../api/api';
 import {tips} from '../utils/tips';
 
 export default class testMixin extends wepy.mixin {
   data = {
-    images: {
-      star: ['../assets/star.png', '../assets/star-color.png']
-    },
+    starImages: ['../assets/star.png', '../assets/star-color.png'],
     isStared: false,
     id: null,
     name: null,
@@ -14,9 +12,6 @@ export default class testMixin extends wepy.mixin {
   };
 
   computed = {
-    starImg: function () {
-      return this.images.star[this.isStared ? 1 : 0];
-    },
     // 是否已经上传过，控制 star 图标显示
     isSubmitted: function () {
       return !!this.id;
@@ -25,61 +20,48 @@ export default class testMixin extends wepy.mixin {
 
   methods = {
     star: async function () {
-      this.isStared = !this.isStared;
-      let id = this.id;
       let isStared = this.isStared;
+      let id = this.id;
       let result = await submitStar({
         data: {
-          starId: id,
-          isStar: !isStared
+          id: id,
+          isStar: !isStared ? 1 : 0
         }
       });
+      if (result.statusCode === 200) {
+        console.log(result.data.star);
+        this.isStared = !!result.data.star;
+        if (this.isStared) {
+          tips.showOk('已收藏');
+        } else {
+          tips.showOk('已取消收藏');
+        }
+        this.$apply();
+      }
     },
     del: function () {
+      let id = this.id;
       wx.showModal({
         title: '删除',
         content: '此操作会删除当前日记，是否继续？',
         success: function (res) {
           if (res.confirm) {
-            wx.navigateBack();
+            if (!id) {
+              wx.navigateBack();
+            } else {
+              // todo 删除接口
+            }
           }
         }
       });
-    },
-    // 最终提交
-    submitLastOnePaunch: async function () {
-      this.packSubmitData();
-      let title = this.name;
-      let type = this.type;
-      let content = this.finalContent;
-      let detail = this.detail;
-      let data = {
-        title: title,
-        type: type,
-        content: content,
-        detail: detail,
-      };
-      console.log(data);
-      let result = await submitDiary({
-        data: data,
-      });
-      console.log(result);
-      if (result.statusCode === 200) {
-        this.id = result.data;
-        tips.showOk('上传成功');
-        wx.navigateBack();
-      }
     }
   };
 
+  starImage() {
+    return this.starImages[this.isStared ? 1 : 0];
+  }
+
   onLoad(params) {
-    // todo 接口：判断是否是由记录点击进入，从而获取数据
-    if (params.id) {
-      let id = params.id;
-      this.id = id;
-      this.name = params.name;
-      this.getRawDiary(id);
-    }
     let that = this;
     wx.setNavigationBarTitle({
       title: that.pageTitle
@@ -87,13 +69,35 @@ export default class testMixin extends wepy.mixin {
   }
 
   getRawDiary = async function (id) {
-    let result = await queryDiary({
+    return await queryDiary({
       data: {
         id: id
       }
     });
+  };
+
+  // 最终提交
+  submitLastOnePaunch = async function () {
+    this.packSubmitData();
+    let title = this.name;
+    let type = this.type;
+    let content = this.finalContent;
+    let detail = this.detail;
+    let data = {
+      title: title,
+      type: type,
+      content: content,
+      detail: detail,
+    };
+    console.log(data);
+    let result = await submitDiary({
+      data: data,
+    });
+    console.log(result);
     if (result.statusCode === 200) {
-      // this.finalContent = result.data;
+      this.id = result.data;
+      tips.showOk('上传成功');
+      wx.navigateBack();
     }
   };
 

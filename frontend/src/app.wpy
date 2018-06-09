@@ -69,7 +69,6 @@ export default class extends wepy.app {
   }
 
   onLaunch() {
-    this.readSession();
   }
 
   readSession() {
@@ -83,6 +82,7 @@ export default class extends wepy.app {
   }
 
   async getSession() {
+    console.log('请求 session');
     // 请求 session 并保存
     let code = (await wepy.login()).code;
     let session = (await askSession({

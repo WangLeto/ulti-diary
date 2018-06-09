@@ -28,6 +28,13 @@ textarea {
   width: 100%;
   z-index: -10;
   background: #f8f8f8;
+  color: #666;
+}
+.title {
+  height: 60rpx;
+  font-size: 35rpx;
+  margin-bottom: 30rpx;
+  border-bottom: 0.5px solid #999;
 }
 </style>
 <template>
@@ -36,18 +43,19 @@ textarea {
       <text class="statistics">{{wordsCount}}字 {{imageCount}}图</text>
       <image src="../assets/image.png" @tap="insertImage"></image>
       <image src="{{starImg}}" wx:if="{{isSubmitted}}" @tap="star"></image>
-      <image src="../assets/ok.png" wx:if="{{!isSubmitted}}" @tap="submitLastOnePaunch"></image>
+      <image src="../assets/ok.png" @tap="submit"></image>
       <image src="../assets/delete.png" @tap="del"></image>
     </view>
     <view class="below-panel">
+      <input placeholder="请输入标题" bindinput="getTitle" class="title"/>
       <view class="content" wx:for="{{content}}" wx:key="{{index}}">
         <textarea wx:if="{{item.type == 0}}" value="{{item.content}}" auto-height maxlength="-1" cursor-spacing="30"
-                  @input="getInput({{index}})" focus="{{focused == index}}" disabled="{{isSubmitted}}"></textarea>
+                  @input="getInput({{index}})" focus="{{focused == index}}"></textarea>
         <image wx:if="{{item.type == 1}}" src="{{item.content}}" class="img" @tap="previewImage({{index}})"
                @longpress="delImage({{index}})" mode="aspectFit"></image>
       </view>
       <textarea value="{{temp}}" focus="{{focused == -1}}" auto-height @input="getInput(-1)"
-                maxlength="-1" cursor-spacing="30" wx:if="{{!isSubmitted}}"></textarea>
+                maxlength="-1" cursor-spacing="30"></textarea>
     </view>
   </view>
 </template>
@@ -56,7 +64,7 @@ import wepy from 'wepy';
 import baseEdit from '../mixins/editBase';
 import _ from 'lodash';
 import {tips} from '../utils/tips';
-import {queryDiary, uploadFile, apiRoot} from '../api/api';
+import {apiRoot} from '../api/api';
 
 export default class TextEdit extends wepy.page {
   data = {
@@ -67,10 +75,9 @@ export default class TextEdit extends wepy.page {
     imageCount: 0,
     focused: -1,
     imageOperateTipped: false,
-    //如果是查看日记就为日记的id
-    id: -1,
     type: 1,
     detail: '',
+    name: '',
   };
 
   components = {
@@ -92,14 +99,19 @@ export default class TextEdit extends wepy.page {
       return this.tpcount();
     },
     starImg: function () {
-    },
+      return this.starImage();
+    }
   };
 
   mixins = [baseEdit];
 
   methods = {
-    confirm: function (e) {
-
+    submit: function () {
+      if (this.content.length === 0 && !this.temp) {
+        tips.showTextToast('无内容');
+        return;
+      }
+      this.submitLastOnePaunch();
     },
     previewImage: function (index) {
       let src = this.content[index].content;
@@ -114,10 +126,9 @@ export default class TextEdit extends wepy.page {
     },
     insertImage: function () {
       if (!this.imageOperateTipped) {
-        tips.showTextToast('长按图片操作，点击图片预览');
         this.imageOperateTipped = true;
       }
-      if (this.temp != '') {
+      if (this.temp !== '') {
         let tp = {};
         tp.type = 0;
         tp.content = this.temp;
@@ -125,36 +136,12 @@ export default class TextEdit extends wepy.page {
         this.$apply();
         this.content.push(tp);
       }
-      let token = wepy.$instance.globalData.session;
       let that = this;
       wx.chooseImage({
         count: 1,
         sizeType: ['compressed'],
         success: function(res) {
-          console.log(res);
-          let tempFilePath = res.tempFilePaths[0];
-          wx.uploadFile({
-            url: apiRoot + '/uploadFile',
-            filePath: tempFilePath,
-            name: 'file',
-            header: {
-              Authorization: token
-            },
-            success: function(r) {
-              console.log(r);
-              if (r.statusCode === 200) {
-                r.data = JSON.parse(r.data);
-                let temp = apiRoot + r.data['path'];
-                let obj = {};
-                obj.content = temp;
-                obj.type = 1;
-                console.log(obj);
-                that.content.push(obj);
-                that.imageCount += 1;
-                that.$apply();
-              }
-            }
-          })
+          that.uploadFile(res.tempFilePaths[0]);
         },
         fail: function(res) {
           console.log(res);
@@ -194,10 +181,10 @@ export default class TextEdit extends wepy.page {
     },
     getInput: function(index,e) {
       //传过来的index是字符串  真的傻逼
-      if(index == -1)
+      if(parseInt(index) === -1)
       {
         this.temp = e.detail.value;
-        if (e.detail.value === '' && this.content.length !== 0 && this.content[this.content.length-1].type == 0) {
+        if (e.detail.value === '' && this.content.length !== 0 && this.content[this.content.length-1].type === 0) {
           this.temp = this.content[this.content.length-1].content;
           this.content.splice(this.content.length-1, 1);
           this.focused = -1;
@@ -215,13 +202,16 @@ export default class TextEdit extends wepy.page {
   };
 
   async getDiary(id) {
-    let res = await queryDiary({
-      data: {id: id},
-    });
+    let res = await this.getRawDiary(id);
     console.log(res);
     if (res.statusCode === 200) {
-      let data = JSON.parse(res.data);
+      let data = res.data;
       this.content = JSON.parse(data.content);
+      this.title = data.title;
+      this.detail = data.detail;
+      this.imageCount = (this.detail.split("字")[1]).split("图")[0];
+      this.isStared = data.star === 1;
+      this.$apply();
     }
   };
   packSubmitData = function () {
@@ -236,12 +226,45 @@ export default class TextEdit extends wepy.page {
     console.log('?????' + this.detail);
     this.finalContent = JSON.stringify(this.content);
   };
+
   onLoad(params) {
     if (params.id) {
+      let id = params.id;
       this.id = id;
       this.isSubmitted = true;
       this.getDiary(id);
     }
+  };
+
+  uploadFile(tempFilePath) {
+    let that = this;
+    wx.uploadFile({
+      url: apiRoot + '/uploadFile',
+      filePath: tempFilePath,
+      name: 'file',
+      header: {
+        Authorization: wepy.$instance.globalData.session
+      },
+      success: function(r) {
+        if (r.statusCode === 200) {
+          r.data = JSON.parse(r.data);
+          let temp = apiRoot + r.data['path'];
+          let obj = {};
+          obj.content = temp;
+          obj.type = 1;
+          that.content.push(obj);
+          that.imageCount += 1;
+          that.$apply();
+          tips.showTextToast('长按图片操作，点击图片预览');
+        } else if (r.statusCode === 401) {
+          wepy.$instance.getSession();
+          that.uploadFile(tempFilePath);
+        }
+      },
+      fail: function () {
+        tips.showError('请检查网络设置');
+      }
+    })
   }
 }
 </script>
