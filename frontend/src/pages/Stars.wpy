@@ -71,7 +71,7 @@ page {
 <template>
   <view class="main-view">
     <!--有几个月的一个遍历-->
-    <view wx:for="{{alldiarys}}" wx:key="{{index}}" wx:for-item="diarys" wx:for-index="idx">
+    <view wx:for="{{allDiarys}}" wx:key="{{index}}" wx:for-item="diarys" wx:for-index="idx">
       <view class="wrapper">
         <view class="circle"></view>
         <view class="line long"></view>
@@ -81,7 +81,7 @@ page {
       <view wx:for="{{diarys}}" wx:key="{{index}}">
         <view class="card">
           <view class="primary">
-            <image src="{{'../assets/' + alltype[item.type]}}" mode="aspectFit" class="img"></image>
+            <image src="{{'../assets/' + alltype[item.type - 1]}}" mode="aspectFit" class="img"></image>
             <text class="text">{{item.title}}</text>
           </view>
           <view class="detail">
@@ -92,110 +92,92 @@ page {
         <view class="line"></view>
       </view>
     </view>
-    <view class="next-page-tip">{{nextPageTip}}</view>
+    <!--结束时间线的圆形-->
+    <view class="wrapper" wx:if="{{thatIsAll}}">
+      <view class="circle"></view>
+    </view>
+    <view class="next-page-tip" wx:if="{{thatIsAll}}">没有更多了</view>
   </view>
 </template>
 
 <script>
 import wepy from 'wepy';
 import {tips} from '../utils/tips';
+import {searchDiary} from '../api/api';
+import _ from 'lodash';
 
 export default class Stars extends wepy.page{
   config = {
-    enablePullDownRefresh: true,
     onReachBottomDistance: true
   };
   data = {
-    // 逻辑有问题……不管了
-    hasPrePage: false,
-    hasNextPage: true,
-    alldiarys: [
-      [{
-        title: 'hehe',
-        year: 2018,
-        month: 4,
-        time: '12:40',
-        ifstared: false,
-        type: 0,
-        detail: '200字2图'
-      },
-      {
-        title: 'lajifor',
-        year: 2018,
-        month: 4,
-        time: '12:30',
-        ifstared: true,
-        type: 1,
-        detail: '3\'19\''
-      },
-      {
-        title: 'zhendelaji',
-        year: 2018,
-        month: 4,
-        time: '11:11',
-        ifstared: false,
-        type: 2,
-        detail: '1\'20\''
-      }],
-      [{
-        title: 'hehe',
-        year: 2018,
-        month: 4,
-        time: '12:40',
-        ifstared: false,
-        type: 0,
-        detail: '200字2图'
-      },
-      {
-        title: 'lajifor',
-        year: 2018,
-        month: 4,
-        time: '12:30',
-        ifstared: true,
-        type: 1,
-        detail: '3\'19\''
-      },
-      {
-        title: 'zhendelaji',
-        year: 2018,
-        month: 4,
-        time: '11:11',
-        ifstared: false,
-        type: 2,
-        detail: '1\'20\''
-      }],
-    ],
+    allDiarys: [],
     alltype: ['text.png', 'audio.png', 'video.png'],
+    offset: 0,
+    total: 0
   };
 
   computed = {
-    nextPageTip: function () {
-      if (this.hasNextPage) {
-        return '上拉加载下一页';
-      } else {
-        return '没有更多了';
-      }
+    thatIsAll: function () {
+      return this.offset >= this.total;
     }
   };
 
   onReachBottom = function () {
-    if (this.hasNextPage) {
-      this.hasNextPage = false;
-      this.hasPrePage = true;
-      tips.showOk('假装加载下页');
-    }
-  };
-
-  onPullDownRefresh = function () {
-    if (this.hasPrePage) {
-      this.hasPrePage = false;
-      this.hasNextPage = true;
-      tips.showOk('假装加载上页');
+    if (this.total > this.offset) {
+      this.doSearch();
     }
   };
 
   onLoad() {
     wx.setNavigationBarTitle({title: '我的收藏⭐'});
+    this.doSearch();
+  };
+
+  async doSearch() {
+    let offset = this.offset;
+    let result = await searchDiary({
+      data: {
+        offset: offset,
+        limit: 6,
+        isStar: 1
+      }
+    });
+    if (result.statusCode === 200) {
+      //所有日历list
+      let data = result.data.list;
+      this.total = result.data.total;
+      _.forEach(data, e => {
+        let l = e.create_at.split(' ');
+        e.time = l[1];
+        e.year = parseInt(l[0].split('-')[0]);
+        e.month = parseInt(l[0].split('-')[1]);
+        if (!e.title) {
+          e.title = '无标题';
+        }
+      });
+      let allDiarys = this.allDiarys;
+      //对所有日历分类
+      _.forEach(data, e => {
+        let check = true;
+        _.forEach(allDiarys, r => {
+          if (r[0].year === e.year && r[0].month === e.month) {
+            r.push(e);
+            check = false;
+          }
+        });
+        if (check) {
+          allDiarys.push([e]);
+        }
+      });
+      this.offset += data.length;
+
+
+      this.$apply();
+    } else if (result.statusCode === 401) {
+      await wepy.$instance.getSession();
+      this.doSearch();
+    }
   }
 }
 </script>

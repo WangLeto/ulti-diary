@@ -14,9 +14,8 @@ const request = async (params = {}, url) => {
   };
   if (wepy.$instance.globalData.session) {
     requestContent.header.Authorization = wepy.$instance.globalData.session;
+    // requestContent.header.Authorization = wx.getStorageSync('session');
   }
-  console.log(requestContent);
-  tips.showLoading('请稍等');
   // 在拦截器关闭 loading
   return await wepy.request(requestContent);
 };
@@ -24,11 +23,13 @@ const request = async (params = {}, url) => {
 const submitDiary = (params) => request(params, apiRoot + 'submitDiary');
 const submitStar = (params) => request(params, apiRoot + 'submitStar');
 const askSession = (params) => request(params, apiRoot + 'askSession');
-const submitRename = (params) => request(params, apiRoot + 'rename');
+const submitRename = (params) => request(params, apiRoot + 'submitRename');
 const getDayHasDiary = (params) => request(params, apiRoot + 'getDayHasDiary');
 const getDayDiaryList = (params) => request(params, apiRoot + 'getDiaryList');
-// 图片、视频仅需 url；视频需要时长信息
+const delDiary = (params) => request(params, apiRoot + 'removeDiary');
 const queryDiary = (params) => request(params, apiRoot + 'queryDiary');
+const searchDiary = (params) => request(params, apiRoot + 'searchDiary');
+const updateDiary = (params) => request(params, apiRoot + 'submitUpdate');
 const uploadFile = async (filePath) => {
   let token = wepy.$instance.globalData.session;
   let r = await wepy.uploadFile({
@@ -42,6 +43,8 @@ const uploadFile = async (filePath) => {
   if (r.statusCode === 200) {
     r.data = JSON.parse(r.data);
     r.data['path'] = apiRoot + r.data['path'];
+  } else if (r.statusCode === 401) {
+    r = await uploadFile(filePath);
   }
   return r;
 };
@@ -55,5 +58,8 @@ module.exports = {
   queryDiary,
   uploadFile,
   getDayHasDiary,
-  getDayDiaryList
+  getDayDiaryList,
+  delDiary,
+  searchDiary,
+  updateDiary,
 };

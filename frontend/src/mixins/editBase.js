@@ -1,5 +1,5 @@
 import wepy from 'wepy';
-import {submitDiary, submitStar, queryDiary, } from '../api/api';
+import {submitDiary, submitStar, queryDiary, delDiary} from '../api/api';
 import {tips} from '../utils/tips';
 
 export default class testMixin extends wepy.mixin {
@@ -12,32 +12,11 @@ export default class testMixin extends wepy.mixin {
   };
 
   computed = {
-    // 是否已经上传过，控制 star 图标显示
-    isSubmitted: function () {
-      return !!this.id;
-    }
   };
 
   methods = {
-    star: async function () {
-      let isStared = this.isStared;
-      let id = this.id;
-      let result = await submitStar({
-        data: {
-          id: id,
-          isStar: !isStared ? 1 : 0
-        }
-      });
-      if (result.statusCode === 200) {
-        console.log(result.data.star);
-        this.isStared = !!result.data.star;
-        if (this.isStared) {
-          tips.showOk('已收藏');
-        } else {
-          tips.showOk('已取消收藏');
-        }
-        this.$apply();
-      }
+    star: function () {
+      this.realStar();
     },
     del: function () {
       let id = this.id;
@@ -49,7 +28,7 @@ export default class testMixin extends wepy.mixin {
             if (!id) {
               wx.navigateBack();
             } else {
-              // todo 删除接口
+              testMixin.deleteDiary(id);
             }
           }
         }
@@ -57,11 +36,52 @@ export default class testMixin extends wepy.mixin {
     }
   };
 
+  async realStar() {
+    let isStared = this.isStared;
+    let id = this.id;
+    let result = await submitStar({
+      data: {
+        id: id,
+        isStar: !isStared ? 1 : 0
+      }
+    });
+    if (result.statusCode === 200) {
+      console.log(result.data.star);
+      this.isStared = !!result.data.star;
+      if (this.isStared) {
+        tips.showOk('已收藏');
+      } else {
+        tips.showOk('已取消收藏');
+      }
+      this.$apply();
+    } else if (result.statusCode === 401) {
+      await wepy.$instance.getSession();
+      this.realStar();
+    }
+  };
+
+  static async deleteDiary(id) {
+    let result = await delDiary({
+      data: {
+        id: id
+      }
+    });
+    if (result.statusCode === 200) {
+      setTimeout(() => {
+        tips.showOk('删除成功');
+      }, 500);
+      wx.navigateBack();
+    } else if (result.statusCode === 401) {
+      await wepy.$instance.getSession();
+      this.deleteDiary(id);
+    }
+  }
+
   starImage() {
     return this.starImages[this.isStared ? 1 : 0];
   }
 
-  onLoad(params) {
+  onLoad() {
     let that = this;
     wx.setNavigationBarTitle({
       title: that.pageTitle
@@ -69,11 +89,17 @@ export default class testMixin extends wepy.mixin {
   }
 
   getRawDiary = async function (id) {
-    return await queryDiary({
+    let result = await queryDiary({
       data: {
         id: id
       }
     });
+    if (result.statusCode === 401) {
+      await wepy.$instance.getSession();
+      result = await this.getRawData(id);
+    } else if (result.statusCode === 200) {
+      return result;
+    }
   };
 
   // 最终提交
@@ -98,6 +124,9 @@ export default class testMixin extends wepy.mixin {
       this.id = result.data;
       tips.showOk('上传成功');
       wx.navigateBack();
+    } else if (result.statusCode === 401) {
+      await wepy.$instance.getSession();
+      this.submitLastOnePaunch();
     }
   };
 

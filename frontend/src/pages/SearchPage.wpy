@@ -42,6 +42,9 @@
   right: 10rpx;
   margin-top: 20rpx;
 }
+.bottom-blank {
+  height: 200rpx;
+}
 </style>
 <template>
   <view class="page">
@@ -56,17 +59,17 @@
             </view>
           </view>
         </view>
-        <view class="weui-search-bar__cancel-btn" bindtap="hideInput">确定</view>
+        <view class="weui-search-bar__cancel-btn" bindtap="search">确定</view>
       </view>
-      <view class="weui-cells searchbar-result" wx:if="{{inputVal.length > 0}}">
+      <view class="weui-cells searchbar-result">
         <!--日记detail-->
         <scroll-view class="cards" scroll-y scroll-top="100">
           <view class="card" wx:for="{{diarys}}" wx:key="{{index}}" data-idx="{{index}}">
-            <view wx:if="{{item.ifstared}}" class="star-wrapper">
+            <view wx:if="{{item.star}}" class="star-wrapper">
               <image src="../assets/star-color.png" mode="aspectFit" class="star"></image>
             </view>
             <view class="primary">
-              <image src="{{'../assets/' + alltype[item.type]}}" mode="aspectFit" class="img"></image>
+              <image src="{{'../assets/' + alltype[item.type - 1]}}" mode="aspectFit" class="img"></image>
               <text class="text">{{item.title}}</text>
             </view>
             <view class="detail">
@@ -74,6 +77,7 @@
               <text class="diary-detail">{{item.detail}}</text>
             </view>
           </view>
+          <view class="bottom-blank"></view>
         </scroll-view>
       </view>
     </view>
@@ -81,52 +85,81 @@
 </template>
 
 <script>
-import wepy from 'wepy'
-export default class Stars extends wepy.page{
+import wepy from 'wepy';
+import {tips} from '../utils/tips';
+import {searchDiary} from '../api/api';
+import _ from 'lodash';
+
+export default class Stars extends wepy.page {
+  config = {
+    onReachBottomDistance: true
+  };
+
   data = {
     inputShowed: true,
     inputVal: "",
-    diarys: [
-      {
-        title: 'hehe',
-        time: '12:40',
-        ifstared: false,
-        type: 0,
-        detail: '200字2图'
-      },
-      {
-        title: 'lajifor',
-        time: '12:30',
-        ifstared: true,
-        type: 1,
-        detail: '3\'19\''
-      },
-      {
-        title: 'zhendelaji',
-        time: '11:11',
-        ifstared: false,
-        type: 2,
-        detail: '1\'20\''
-      },
-    ],
+    diarys: [],
     alltype: ['text.png', 'audio.png', 'video.png'],
+    offset: 0,
+    total: 0
   };
   methods = {
-    showInput() {
-      this.inputShowed = true;
-    },
-    hideInput() {
-      this.inputShowed = false;
-    },
     clearInput() {
       this.inputVal = "";
     },
     inputTyping(e) {
       this.inputVal = e.detail.value;
+    },
+    search() {
+      if (!this.inputVal) {
+        tips.showTextToast('请输入内容再进行搜索');
+      } else {
+        this.diarys = [];
+        this.offset = 0;
+        this.total = 0;
+        this.doSearch();
+      }
     }
   };
+
   onLoad() {
     wx.setNavigationBarTitle({title: '搜索'});
   }
+
+  async doSearch() {
+    let offset = this.offset;
+    let key = this.inputVal;
+    let result = await searchDiary({
+      data: {
+        offset: offset,
+        limit: 7,
+        searchKey: key
+      }
+    });
+    if (result.statusCode === 200) {
+      let data = result.data.list;
+      this.total = result.data.total;
+      _.forEach(data, e => {
+        e.time = e.create_at.split(' ')[1];
+        if (!e.title) {
+          e.title = '无标题';
+        }
+      });
+      this.offset += data.length;
+      this.diarys = this.diarys.concat(data);
+      this.$apply();
+    } else if (result.statusCode === 401) {
+      await wepy.$instance.getSession();
+      this.doSearch();
+    }
+  }
+
+  onReachBottom = function () {
+    if (this.total <= this.diarys.length) {
+      tips.showTextToast('没有更多了');
+    } else {
+      this.doSearch();
+    }
+  };
 }
 </script>

@@ -327,7 +327,7 @@ page {
   background:#fff;
   height:100rpx;
   padding-right:15px;
-  box-shadow:0 30rpx 30rpx 1rpx rgba(0,0,0,0.15);
+  box-shadow: 0 20rpx 20rpx 1rpx rgba(0,0,0,0.15);
   z-index: 1;
 }
 
@@ -397,6 +397,9 @@ page {
   top: 0;
   border: 1rpx solid #FF9800;
 }
+.bottom-blank {
+  height: 200rpx;
+}
 </style>
 
 <template>
@@ -433,7 +436,7 @@ page {
     </view>
     <!--日记detail-->
     <scroll-view class="cards" scroll-y scroll-top="100">
-      <view class="card" wx:for="{{diarys}}" wx:key="{{index}}" data-idx="{{index}}">
+      <view class="card" wx:for="{{diarys}}" wx:key="{{index}}" data-idx="{{index}}" @tap="goDiaryPage({{index}})">
         <view wx:if="{{item.star}}" class="star-wrapper">
           <image src="../assets/star-color.png" mode="aspectFit" class="star"></image>
         </view>
@@ -446,6 +449,7 @@ page {
           <text class="diary-detail">{{item.detail}}</text>
         </view>
       </view>
+      <view class="bottom-blank"></view>
     </scroll-view>
   <!--写日记按钮-->
   <image src="{{btnimg}}" class="add" @tap="addTap"></image>
@@ -666,32 +670,41 @@ export default class Homepage extends wepy.page{
         url: 'SearchPage'
       });
     },
-    goTextPage(e) {
-      let id = '';
-      if (e) {
-        id = e.currentTarget.id;
-      }
+    goTextPage(id='') {
       wepy.navigateTo({
         url: 'TextEdit?id=' + id
       });
     },
-    goAudioPage(e) {
-      let id = '';
-      if (e) {
-        id = e.currentTarget.id;
+    goAudioPage(id='') {
+      if (typeof id !== 'number') {
+        id = '';
       }
       wepy.navigateTo({
         url: 'AudioEdit?id=' + id
       });
     },
-    goVideoPage(e) {
-      let id = '';
-      if (e) {
-        id = e.currentTarget.id;
+    goVideoPage(id='') {
+      if (typeof id !== 'number') {
+        id = '';
       }
       wepy.navigateTo({
         url: 'VideoEdit?id=' + id
       });
+    },
+    goDiaryPage(index) {
+      let type = this.diarys[index].type - 1;
+      let id = this.diarys[index].id;
+      switch (type) {
+      case 0:
+        this.methods.goTextPage(id);
+        break;
+      case 1:
+        this.methods.goAudioPage(id);
+        break;
+      case 2:
+        this.methods.goVideoPage(id);
+        break;
+      }
     }
   };
   computed = {
@@ -706,6 +719,7 @@ export default class Homepage extends wepy.page{
   onShow() {
     this.checkstate = 0;
     this.$apply();
+    this.getDiaryList();
   };
   onLoad() {
     wepy.$instance.readSession();
@@ -725,7 +739,6 @@ export default class Homepage extends wepy.page{
     wx.setNavigationBarTitle({title: '极日记'});
 
     this.getDiaryDays();
-    this.getDiaryList();
   };
 
   async getDiaryDays() {
@@ -748,6 +761,9 @@ export default class Homepage extends wepy.page{
         e.hasDiary = _.includes(r, day);
       });
       this.$apply();
+    } else if (result.statusCode === 401) {
+      await wepy.$instance.getSession();
+      this.getDiaryDays();
     }
   }
 
@@ -772,6 +788,9 @@ export default class Homepage extends wepy.page{
       });
       this.diarys = data;
       this.$apply();
+    } else if (result.statusCode === 401) {
+      await wepy.$instance.getSession();
+      this.getDiaryList();
     }
   };
 }

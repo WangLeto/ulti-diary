@@ -44,7 +44,7 @@
 <template>
   <view class="main">
     <view class="top-bar">
-      <image src="{{starImg}}" wx:if="{{!isSubmitted}}" @tap="star"></image>
+      <image src="{{starImg}}" wx:if="{{isSubmitted}}" @tap="star"></image>
       <image src="../assets/ok.png" wx:if="{{showUploadBtn}}" @tap="submit"></image>
       <image src="../assets/delete.png" @tap="del"></image>
     </view>
@@ -53,7 +53,7 @@
         <view class="current-time">{{currentTime}}</view>
         <view class="total-time" wx:if="{{showTotalTime}}">{{totalTime}}</view>
       </view>
-      <titleEdit :name="name" :name.sync="name" wx:if="{{isSubmitted}}"></titleEdit>
+      <titleEdit :name.sync="name" :id.sync="id"></titleEdit>
       <view class="btn-area">
         <image class="main-btn" src="{{mainBtnImg}}" animation="{{mainBtnAnimation}}" @tap="mainTap"></image>
         <image class="side-btn" src="../assets/audio/stop-record.jpg" animation="{{sideBtnAnimation}}" @tap="stopRecord"></image>
@@ -81,7 +81,11 @@ export default class AudioEdit extends wepy.page {
         'recording', 'record-pause', 'wait-play', 'playing', 'play-pause'],
       current: 0
     },
-    recordTime: 0
+    recordTime: 0,
+    type: 2,
+    finalContent: null,
+    detail: null,
+    isSubmitted: false
   };
 
   components = {
@@ -109,7 +113,10 @@ export default class AudioEdit extends wepy.page {
       return !!this.id || this.recordTime !== 0;
     },
     showUploadBtn: function () {
-      return !this.submitted && (this.recordTime !== 0);
+      return !this.id && (this.recordTime !== 0);
+    },
+    starImg: function () {
+      return this.starImage();
     }
   };
 
@@ -153,7 +160,9 @@ export default class AudioEdit extends wepy.page {
       // 先上传静态文件，然后在 baseEdit 中上传日记信息
       let filePath = this.player.innerPlayer.src;
       let r = await uploadFile(filePath);
-      console.log(r);
+      this.finalContent = r.data.path;
+      await this.submitLastOnePaunch();
+      wx.navigateBack();
     }
   };
 
@@ -169,6 +178,29 @@ export default class AudioEdit extends wepy.page {
     this.sideBtnAnimation = wx.createAnimation({timingFunction: 'ease'});
     this.mainBtnAnimation.translateX(-30).step({duration: 200});
     this.sideBtnAnimation.opacity(1).translateX(70).step({duration: 200});
+  };
+
+  packSubmitData() {
+    this.detail = this.secondFormat2(this.recordTime);
+  };
+
+  async onLoad(params) {
+    let id = params.id;
+    if (id) {
+      let res = await this.getRawDiary(id);
+      let data = res.data;
+      this.id = data.id;
+      this.name = data.title;
+      this.player.init(data.content);
+      this.isSubmitted = true;
+      this.isStared = data.star === 1;
+      let details = data.detail.split("'");
+      this.recordTime = 60 * parseInt(details[0]) + parseInt(details[1]);
+      this.state.current = WAIT_PLAY;
+      this.$apply();
+    } else {
+      this.$titleEdit$isShowEdit = true;
+    }
   };
 
   recorder = {

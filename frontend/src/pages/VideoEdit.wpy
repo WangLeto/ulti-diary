@@ -15,8 +15,8 @@ video {
 <template>
   <view class="main">
     <view class="top-bar">
-      <image src="{{starImg}}" wx:if="{{!isSubmitted}}" @tap="star"></image>
-      <image src="../assets/ok.png" wx:if="{{isSubmitted}}"></image>
+      <image src="{{starImg}}" wx:if="{{isSubmitted}}" @tap="star"></image>
+      <image src="../assets/ok.png" wx:if="{{!isSubmitted}}" @tap="submit"></image>
       <image src="../assets/delete.png" @tap="del"></image>
     </view>
     <view class="below-panel">
@@ -24,7 +24,7 @@ video {
         <video src="{{src}}" binderror="videoErrorCallback" controls></video>
       </view>
       <view class="duration">{{videoTime}}</view>
-      <titleEdit :name="name" :name.sync="name" wx:if="{{isSubmitted}}"></titleEdit>
+      <titleEdit :name.sync="name" :id.sync="id"></titleEdit>
     </view>
   </view>
 </template>
@@ -33,13 +33,17 @@ import wepy from 'wepy';
 import baseEdit from '../mixins/editBase';
 import TitleEdit from '../components/TitleEdit';
 import {tips} from '../utils/tips';
+import {uploadFile} from '../api/api';
 
 export default class VideoEdit extends wepy.page {
   data = {
     pageTitle: '视频日记',
-    id: null,
     src: '',
-    videoDuration: 0
+    videoDuration: 0,
+    type: 3,
+    finalContent: null,
+    detail: null,
+    isSubmitted: false
   };
 
   components = {
@@ -51,30 +55,60 @@ export default class VideoEdit extends wepy.page {
   methods = {
     videoErrorCallback: function () {
       tips.showError('视频加载出错');
+    },
+    submit: async function () {
+      // 先上传静态文件，然后在 baseEdit 中上传日记信息
+      let filePath = this.src;
+      let r = await uploadFile(filePath);
+      console.log(r);
+      this.finalContent = r.data.path;
+      await this.submitLastOnePaunch();
+      wx.navigateBack();
     }
   };
 
   computed = {
     videoTime: function () {
       return this.secondFormat2(this.videoDuration);
+    },
+    starImg: function () {
+      return this.starImage();
     }
   };
 
-  onLoad() {
-    tips.showTextToast('仅支持最长60s视频');
-    if (!this.id) {
-      let that = this;
-      wx.chooseVideo({
-        compressed: true,
-        success: e => {
-          that.src = e.tempFilePath;
-          that.videoDuration = e.duration;
-          that.$apply();
-        },
-        fail: e => {
-          tips.showError('视频导入失败');
-        }
-      });
+  packSubmitData() {
+    this.detail = this.secondFormat2(this.videoDuration);
+  };
+
+  async onLoad(params) {
+    let id = params.id;
+    if (id) {
+      let res = await this.getRawDiary(id);
+      let data = res.data;
+      this.id = data.id;
+      this.name = data.title;
+      this.src = data.content;
+      this.isSubmitted = true;
+      this.isStared = data.star === 1;
+      let details = data.detail.split("'");
+      this.videoDuration = 60 * parseInt(details[0]) + parseInt(details[1]);
+      this.$apply();
+    } else {
+      tips.showTextToast('仅支持最长60s视频');
+      if (!this.id) {
+        let that = this;
+        wx.chooseVideo({
+          compressed: true,
+          success: e => {
+            that.src = e.tempFilePath;
+            that.videoDuration = e.duration;
+            that.$apply();
+          },
+          fail: e => {
+            wx.navigateBack();
+          }
+        });
+      }
     }
   }
 }

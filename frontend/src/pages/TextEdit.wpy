@@ -47,7 +47,7 @@ textarea {
       <image src="../assets/delete.png" @tap="del"></image>
     </view>
     <view class="below-panel">
-      <input placeholder="请输入标题" bindinput="getTitle" class="title"/>
+      <input placeholder="请输入标题" bindinput="getTitle" class="title" value="{{name}}"/>
       <view class="content" wx:for="{{content}}" wx:key="{{index}}">
         <textarea wx:if="{{item.type == 0}}" value="{{item.content}}" auto-height maxlength="-1" cursor-spacing="30"
                   @input="getInput({{index}})" focus="{{focused == index}}"></textarea>
@@ -64,7 +64,7 @@ import wepy from 'wepy';
 import baseEdit from '../mixins/editBase';
 import _ from 'lodash';
 import {tips} from '../utils/tips';
-import {apiRoot} from '../api/api';
+import {apiRoot, updateDiary} from '../api/api';
 
 export default class TextEdit extends wepy.page {
   data = {
@@ -106,21 +106,26 @@ export default class TextEdit extends wepy.page {
   mixins = [baseEdit];
 
   methods = {
+    getTitle: function(e) {
+      this.name = e.detail.value;
+    },
     submit: function () {
-      if (this.content.length === 0 && !this.temp) {
+      if (this.content.length === 0 && !this.temp && !this.name) {
         tips.showTextToast('无内容');
         return;
       }
-      this.submitLastOnePaunch();
+      if (this.id) {
+        this.doUpdateDiary();
+      } else {
+        this.submitLastOnePaunch();
+      }
     },
     previewImage: function (index) {
       let src = this.content[index].content;
-      console.log(src);
       wx.previewImage({
         // 似乎本地资源无法预览
         urls: [src],
         fail: e => {
-          console.log(e);
         }
       });
     },
@@ -144,7 +149,6 @@ export default class TextEdit extends wepy.page {
           that.uploadFile(res.tempFilePaths[0]);
         },
         fail: function(res) {
-          console.log(res);
         }
       })
     },
@@ -203,16 +207,13 @@ export default class TextEdit extends wepy.page {
 
   async getDiary(id) {
     let res = await this.getRawDiary(id);
-    console.log(res);
-    if (res.statusCode === 200) {
-      let data = res.data;
-      this.content = JSON.parse(data.content);
-      this.title = data.title;
-      this.detail = data.detail;
-      this.imageCount = (this.detail.split("字")[1]).split("图")[0];
-      this.isStared = data.star === 1;
-      this.$apply();
-    }
+    let data = res.data;
+    this.content = JSON.parse(data.content);
+    this.name = data.title;
+    this.detail = data.detail;
+    this.imageCount = (this.detail.split("字")[1]).split("图")[0];
+    this.isStared = data.star === 1;
+    this.$apply();
   };
   packSubmitData = function () {
     // content 转换为字符串
@@ -223,7 +224,6 @@ export default class TextEdit extends wepy.page {
     }
     this.$apply();
     this.detail = this.tpcount() + '字 ' + this.imageCount + '图';
-    console.log('?????' + this.detail);
     this.finalContent = JSON.stringify(this.content);
   };
 
@@ -236,7 +236,8 @@ export default class TextEdit extends wepy.page {
     }
   };
 
-  uploadFile(tempFilePath) {
+  async uploadFile(tempFilePath) {
+    await wepy.$instance.getSession();
     let that = this;
     wx.uploadFile({
       url: apiRoot + '/uploadFile',
@@ -257,7 +258,6 @@ export default class TextEdit extends wepy.page {
           that.$apply();
           tips.showTextToast('长按图片操作，点击图片预览');
         } else if (r.statusCode === 401) {
-          wepy.$instance.getSession();
           that.uploadFile(tempFilePath);
         }
       },
@@ -265,6 +265,23 @@ export default class TextEdit extends wepy.page {
         tips.showError('请检查网络设置');
       }
     })
+  };
+  async doUpdateDiary () {
+    this.packSubmitData();
+    let that = this;
+    let result = await updateDiary({
+      data: {
+        id: that.id,
+        title: that.name,
+        content: JSON.stringify(that.content),
+        detail: that.detail,
+      }
+    });
+    if (result.statusCode === 200) {
+      tips.showOk('更新成功');
+    } else if (result.statusCode === 401) {
+      that.doUpdateDiary();
+    }
   }
 }
 </script>

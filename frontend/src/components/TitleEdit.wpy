@@ -13,6 +13,7 @@
 }
 .init-title {
   font-size: 35rpx;
+  color: #888;
 }
 .edit-img {
   height: 40rpx;
@@ -41,12 +42,9 @@
     <image class="edit-img title" src="../assets/edit.png"></image>
   </view>
   <view wx:if="{{isShowEdit}}">
-    <view class="line" wx:if="{{!hasName}}">
-      <input class="title-input title" type="text" placeholder="输入语音日记名称" bindinput="getInput"/>
-      <button class="sure-btn title">确认</button>
-    </view>
-    <view class="line" wx:if="{{hasName}}">
-      <input class="title-input title" type="text" focus="true" value="{{name}}" bindinput="getInput"/>
+    <view class="line">
+      <input class="title-input title" type="text" focus="{{hasName}}" value="{{name}}"
+             bindinput="getInput" placeholder="输入语音日记名称"/>
       <button class="sure-btn title" @tap="sureRename">确认</button>
     </view>
   </view>
@@ -54,7 +52,7 @@
 <script>
 import wepy from 'wepy';
 import {submitRename} from '../api/api';
-import tips from '../utils/tips';
+import {tips} from '../utils/tips';
 
 export default class TitleEdit extends wepy.component {
   props = {
@@ -65,46 +63,63 @@ export default class TitleEdit extends wepy.component {
     },
     id: {
       type: String,
-      default: null
+      default: null,
     }
   };
 
   data = {
-    // 是否显示编辑的输入框和按钮：用户点击修改原标题或无标题的情况下
-    isShowEdit: false
+    isShowEditFlag: null,
+    tempName: '',
   };
 
   computed = {
     hasName: function () {
       return !!this.name;
+    },
+    isShowEdit: function () {
+      //如果点了showedit一定显示 刚进来看name有没有 有的话不显示
+      if (this.isShowEditFlag === null) {
+        return !this.name;
+      } else {
+        return this.isShowEditFlag;
+      }
     }
   };
 
   methods = {
     getInput: function (e) {
-      this.name = e.detail.value;
+      this.tempName = e.detail.value;
     },
     sureRename: async function () {
-      console.log(this.name);
-      let name = this.name;
-      let id = this.id;
-      let result = await submitRename({
-        data: {
-          id: id,
-          name: name
-        }
-      });
-      if (result.statusCode === 200) {
-        this.isShowEdit = false;
-      }
+      this.isShowEditFlag = false;
+      this.name = this.tempName;
+      this.realSureRename();
     },
     showEditPanel: function () {
-      this.isShowEdit = true;
+      this.tempName = this.name;
+      this.isShowEditFlag = true;
     }
   };
 
-  onLoad = function () {
-    this.isShowEdit = !this.name;
-  }
+  realSureRename = async function () {
+    if (!this.id) {
+      return;
+    }
+    let name = this.name;
+    let id = this.id;
+    let result = await submitRename({
+      data: {
+        id: id,
+        title: name
+      }
+    });
+    if (result.statusCode === 200) {
+      this.isShowEditFlag = false;
+      tips.showOk('重命名成功');
+    } else if (result.statusCode === 401) {
+      await wepy.$instance.getSession();
+      this.realSureRename();
+    }
+  };
 }
 </script>

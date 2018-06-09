@@ -47,6 +47,7 @@ export default class extends wepy.app {
     this.use('requestfix');
     this.intercept('request', {
       config (p) {
+        wepy.$instance.globalData.lastRequest = p;
         return p;
       },
       success (p) {
@@ -56,11 +57,8 @@ export default class extends wepy.app {
         return p;
       },
       async complete (p) {
-        tips.hideLoading();
-        // 401 无 session 或 session 过期
         if (p.statusCode === 401) {
-          this.getSession();
-          tips.showTextToast('已刷新登录状态，建议重试');
+          // this.getSession();
         } else if (p.statusCode === 400) {
           tips.showError('出错了！');
         }
