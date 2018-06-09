@@ -56,6 +56,20 @@ class DiaryController extends Controller
         }
     }
 
+    public function removeDiary(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'required|integer|min:1'
+        ]);
+
+        try {
+            $this->diaryRepository->remove($request->id);
+            return $this->response->success("success");
+        } catch (Exception $e) {
+            return $this->response->withBadRequest($e->getMessage());
+        }
+    }
+
     public function searchDiary(Request $request)
     {
         $this->validate($request, [
@@ -107,6 +121,19 @@ class DiaryController extends Controller
 
         try {
             return $this->response->success($this->diaryRepository->updateStar($request->id, $request->isStar));
+        } catch (Exception $e) {
+            return $this->response->withBadRequest($e->getMessage());
+        }
+    }
+
+    public function submitUpdate(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'required|integer|min:1'
+        ]);
+
+        try {
+            return $this->response->success($this->diaryRepository->update($request->all()));
         } catch (Exception $e) {
             return $this->response->withBadRequest($e->getMessage());
         }
