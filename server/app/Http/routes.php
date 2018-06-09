@@ -19,9 +19,11 @@ Route::group(['middleware' => 'jwt.auth'], function() {
 	Route::post('getDayHasDiary', 'DiaryController@getDayHasDiary');
 	Route::post('getDiaryList', 'DiaryController@getDiaryList');
 	Route::post('queryDiary', 'DiaryController@queryDiary');
+	Route::post('removeDiary', 'DiaryController@removeDiary');
 	Route::post('searchDiary', 'DiaryController@searchDiary');
 	Route::post('submitDiary', 'DiaryController@submitDiary');
 	Route::post('submitRename', 'DiaryController@submitRename');
 	Route::post('submitStar', 'DiaryController@submitStar');
+	Route::post('submitUpdate', 'DiaryController@submitUpdate');
 	Route::post('uploadFile', 'DiaryController@uploadFile');
 });

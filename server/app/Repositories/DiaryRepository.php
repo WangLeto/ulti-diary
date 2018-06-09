@@ -104,6 +104,19 @@ class DiaryRepository
     }
 
     /**
+     * delete the record.
+     * 
+     * @param  Illuminate\Http\Request $request
+     * @return App\Models\Diary
+     */
+    public function remove($id)
+    {
+        $user = \JWTAuth::user();
+
+        $this->model->where('user', '=', $user->getAttribute($user->getKeyName()))->where($this->model->getKeyName(), '=', $id)->delete();
+    }
+
+    /**
      * Get records.
      *
      * @param  array $parameters
@@ -123,6 +136,26 @@ class DiaryRepository
     }
 
     /**
+     * Update the record.
+     * 
+     * @param  Illuminate\Http\Request $request
+     * @return App\Models\Diary
+     */
+    public function update($model)
+    {
+        $user = \JWTAuth::user();
+
+        $this->model = $this->model->where('user', '=', $user->getAttribute($user->getKeyName()))->where($this->model->getKeyName(), '=', $model['id'])->firstOrFail();
+        $this->model->title = $model['title'];
+        $this->model->content = $model['content'];
+        $this->model->detail = $model['detail'];
+        $this->model->update_at = date('Y-m-d H:m:s', time());
+        $this->model->save();
+
+        return $this->getById($this->model->getAttribute($this->model->getKeyName()));
+    }
+
+    /**
      * Update the star state of the record.
      * 
      * @param  int $id
@@ -131,29 +164,33 @@ class DiaryRepository
      */
     public function updateStar($id, $state)
     {
-        $this->model = $this->model->findOrFail($id);
+        $user = \JWTAuth::user();
+
+        $this->model = $this->model->where('user', '=', $user->getAttribute($user->getKeyName()))->where($this->model->getKeyName(), '=', $id)->firstOrFail();
         $this->model->star = $state;
         $this->model->update_at = date('Y-m-d H:m:s', time());
         $this->model->save();
 
-        return $this->getById($id);
+        return $this->getById($this->model->getAttribute($this->model->getKeyName()));
     }
 
     /**
      * Update the title of the record.
      * 
      * @param  int $id
-     * @param  string $name
+     * @param  string $title
      * @return App\Models\Diary
      */
-    public function updateTitle($id, $name)
+    public function updateTitle($id, $title)
     {
-        $this->model = $this->model->findOrFail($id);
-        $this->model->title = $name;
+        $user = \JWTAuth::user();
+
+        $this->model = $this->model->where('user', '=', $user->getAttribute($user->getKeyName()))->where($this->model->getKeyName(), '=', $id)->firstOrFail();
+        $this->model->title = $title;
         $this->model->update_at = date('Y-m-d H:m:s', time());
         $this->model->save();
 
-        return $this->getById($id);
+        return $this->getById($this->model->getAttribute($this->model->getKeyName()));
     }
 
     /**

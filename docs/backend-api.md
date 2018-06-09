@@ -140,6 +140,44 @@
 }
 ```
 
+### 更新日记信息
+
+* URL
+
+| 协议   | URL           | 方法   |
+| :--- | :------------ | :--- |
+| HTTP | /submitUpdate | POST |
+
+* 请求头
+
+| 名称            | 值                   | 描述   |
+| :------------ | :------------------ | :--- |
+| Accept        | application/json    |      |
+| Authorization | Bearer +（空格）+（认证令牌） | 认证信息 |
+
+* 请求参数
+
+| 名称    | 类型      | 描述   |
+| :---- | :------ | :--- |
+| id    | Integer | 日记ID |
+| title | String  | 标题   |
+| content | String  | 内容              |
+| detail  | String  | 详情              |
+
+* 返回结果示例
+
+```json
+{
+  "id": 1,
+  "title": "日记1",
+  "type": 1,
+  "content": "",
+  "star": 0,
+  "create_at": "2018-06-08 16:06:48",
+  "update_at": "2018-06-08 16:06:48"
+}
+```
+
 ### 更新日记标题
 
 * URL
@@ -307,4 +345,31 @@
   ],
   "total": 4
 }
+```
+
+### 删除日记信息
+
+* URL
+
+| 协议   | URL           | 方法   |
+| :--- | :------------ | :--- |
+| HTTP | /removeDiary | POST |
+
+* 请求头
+
+| 名称            | 值                   | 描述   |
+| :------------ | :------------------ | :--- |
+| Accept        | application/json    |      |
+| Authorization | Bearer +（空格）+（认证令牌） | 认证信息 |
+
+* 请求参数
+
+| 名称    | 类型      | 描述   |
+| :---- | :------ | :--- |
+| id    | Integer | 日记ID |
+
+* 返回结果示例
+
+```json
+success
 ```
