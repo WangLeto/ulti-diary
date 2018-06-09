@@ -30,8 +30,9 @@ class DiaryRepository
         $this->model->content = $model['content'];
         $this->model->detail = $model['detail'];
         $this->model->star = 0;
-        $this->model->create_at = date('Y-m-d H:m:s', time());
-        $this->model->update_at = date('Y-m-d H:m:s', time());
+        $this->model->create_at = date('Y-m-d H:i:s', time());
+        var_dump(date('Y-m-d H:i:s', time()));
+        $this->model->update_at = date('Y-m-d H:i:s', time());
         $this->model->save();
 
         return $this->getById($this->model->getAttribute($this->model->getKeyName()));
@@ -68,8 +69,8 @@ class DiaryRepository
         }
 
         $builder = $this->model->where('user', '=', $user->getAttribute($user->getKeyName()));
-        $this->isNull($beginTime) || $builder = $builder->where('create_at', '>=', $beginTime->format('Y-m-d H:m:s'));
-        $this->isNull($endTime) || $builder = $builder->where('create_at', '<', $endTime->format('Y-m-d H:m:s'));
+        $this->isNull($beginTime) || $builder = $builder->where('create_at', '>=', $beginTime->format('Y-m-d H:i:s'));
+        $this->isNull($endTime) || $builder = $builder->where('create_at', '<', $endTime->format('Y-m-d H:i:s'));
 
         return $builder->groupBy(\DB::raw('DATE_FORMAT(create_at, "%Y-%m-%d")'))->select(\DB::raw('DATE_FORMAT(create_at, "%Y-%m-%d") AS day'))->pluck('day');
     }
@@ -97,10 +98,10 @@ class DiaryRepository
         }
 
         $builder = $this->model->where('user', '=', $user->getAttribute($user->getKeyName()));
-        $this->isNull($beginTime) || $builder = $builder->where('create_at', '>=', $beginTime->format('Y-m-d H:m:s'));
-        $this->isNull($endTime) || $builder = $builder->where('create_at', '<', $endTime->format('Y-m-d H:m:s'));
+        $this->isNull($beginTime) || $builder = $builder->where('create_at', '>=', $beginTime->format('Y-m-d H:i:s'));
+        $this->isNull($endTime) || $builder = $builder->where('create_at', '<', $endTime->format('Y-m-d H:i:s'));
 
-        return $builder->groupBy(\DB::raw('DATE_FORMAT(create_at, "%Y-%m-%d")'))->get();
+        return $builder->orderBy('create_at', 'desc')->get();
     }
 
     /**
@@ -149,7 +150,7 @@ class DiaryRepository
         $this->model->title = $model['title'];
         $this->model->content = $model['content'];
         $this->model->detail = $model['detail'];
-        $this->model->update_at = date('Y-m-d H:m:s', time());
+        $this->model->update_at = date('Y-m-d H:i:s', time());
         $this->model->save();
 
         return $this->getById($this->model->getAttribute($this->model->getKeyName()));
@@ -168,7 +169,7 @@ class DiaryRepository
 
         $this->model = $this->model->where('user', '=', $user->getAttribute($user->getKeyName()))->where($this->model->getKeyName(), '=', $id)->firstOrFail();
         $this->model->star = $state;
-        $this->model->update_at = date('Y-m-d H:m:s', time());
+        $this->model->update_at = date('Y-m-d H:i:s', time());
         $this->model->save();
 
         return $this->getById($this->model->getAttribute($this->model->getKeyName()));
@@ -187,7 +188,7 @@ class DiaryRepository
 
         $this->model = $this->model->where('user', '=', $user->getAttribute($user->getKeyName()))->where($this->model->getKeyName(), '=', $id)->firstOrFail();
         $this->model->title = $title;
-        $this->model->update_at = date('Y-m-d H:m:s', time());
+        $this->model->update_at = date('Y-m-d H:i:s', time());
         $this->model->save();
 
         return $this->getById($this->model->getAttribute($this->model->getKeyName()));
