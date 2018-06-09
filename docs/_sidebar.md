@@ -1,5 +1,6 @@
 - **简介**
   - [快速开始](README.md)
 - **设计**
+  - [原形设计](design.md)
 - **代码**
   - [后端 API](backend-api.md)

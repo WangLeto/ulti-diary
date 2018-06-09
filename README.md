@@ -32,4 +32,10 @@ npm run dev
 
 `wepy` 的 `repeat` 标签有坑，不要使用。列表渲染使用微信小程序原生的 `wx:for`。
 
+### 使用的开源项目
+
+[wx_calendar](https://github.com/treadpit/wx_calendar)
+
 ## 后端
+
+详见线上文档。
