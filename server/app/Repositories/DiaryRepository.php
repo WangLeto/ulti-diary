@@ -100,7 +100,7 @@ class DiaryRepository
         $this->isNull($beginTime) || $builder = $builder->where('create_at', '>=', $beginTime->format('Y-m-d H:m:s'));
         $this->isNull($endTime) || $builder = $builder->where('create_at', '<', $endTime->format('Y-m-d H:m:s'));
 
-        return $builder->groupBy(\DB::raw('DATE_FORMAT(create_at, "%Y-%m-%d")'))->get();
+        return $builder->orderBy('create_at', 'desc')->get();
     }
 
     /**
