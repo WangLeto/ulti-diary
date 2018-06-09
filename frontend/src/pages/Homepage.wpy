@@ -422,7 +422,7 @@ page {
           </view>
           <view class="grid white-color box box-align-center box-pack-center riqi" wx:for="{{days}}" wx:key="{{index}}" data-idx="{{index}}" bindtap="tapDayItem">
             <view class="day {{item.day == choosed ? (curBase + (item.day-1) * 86400000 > curDate ? 'biandank' : 'border-radius pink-bg') : ''}} box box-align-center box-pack-center  {{curBase + (item.day-1) * 86400000 > curDate ? 'biandan' : ''}}">{{item.day}}</view>
-            <view class="{{item.hasdiary ? 'has-diary' : ''}} box box-align-center box-pack-center"></view>
+            <view class="{{item.hasDiary ? 'has-diary' : ''}} box box-align-center box-pack-center"></view>
           </view>
         </view>
       </view>
@@ -434,11 +434,11 @@ page {
     <!--日记detail-->
     <scroll-view class="cards" scroll-y scroll-top="100">
       <view class="card" wx:for="{{diarys}}" wx:key="{{index}}" data-idx="{{index}}">
-        <view wx:if="{{item.ifstared}}" class="star-wrapper">
+        <view wx:if="{{item.star}}" class="star-wrapper">
           <image src="../assets/star-color.png" mode="aspectFit" class="star"></image>
         </view>
         <view class="primary">
-          <image src="{{'../assets/' + alltype[item.type]}}" mode="aspectFit" class="img"></image>
+          <image src="{{'../assets/' + alltype[item.type - 1]}}" mode="aspectFit" class="img"></image>
           <text class="text">{{item.title}}</text>
         </view>
         <view class="detail">
@@ -479,7 +479,9 @@ page {
 </template>
 
 <script>
-import wepy from 'wepy'
+import wepy from 'wepy';
+import {getDayHasDiary, getDayDiaryList} from '../api/api';
+import _ from 'lodash';
 
 export default class Homepage extends wepy.page{
   components = {
@@ -508,40 +510,18 @@ export default class Homepage extends wepy.page{
     checkstate: 0,
     audioAnimation: null,
     videoAnimation: null,
-    diarys: [
-      {
-        title: 'hehe',
-        time: '12:40',
-        ifstared: false,
-        type: 0,
-        detail: '200字2图'
-      },
-      {
-        title: 'lajifor',
-        time: '12:30',
-        ifstared: true,
-        type: 1,
-        detail: '3\'19\''
-      },
-      {
-        title: 'zhendelaji',
-        time: '11:11',
-        ifstared: false,
-        type: 2,
-        detail: '1\'20\''
-      }
-    ],
+    diarys: [],
     alltype: ['text.png', 'audio.png', 'video.png'],
   };
-  getThisMonthDays(year, month) {
+  static getThisMonthDays(year, month) {
     return new Date(year, month, 0).getDate();
   };
-  getFirstDayOfWeek(year, month) {
+  static getFirstDayOfWeek(year, month) {
     return new Date(Date.UTC(year, month - 1, 1)).getDay();
   };
   //计算空格个数
   calculateEmptyGrids(year, month) {
-    const firstDayOfWeek = this.getFirstDayOfWeek(year, month);
+    const firstDayOfWeek = Homepage.getFirstDayOfWeek(year, month);
     let empytGrids = [];
     if (firstDayOfWeek > 0) {
       for (let i = 0; i < firstDayOfWeek; i++) {
@@ -557,11 +537,10 @@ export default class Homepage extends wepy.page{
   //对年和月计算这个月有多少天
   calculateDays(year, month) {
     let days = [];
-    const thisMonthDays = this.getThisMonthDays(year, month);
+    const thisMonthDays = Homepage.getThisMonthDays(year, month);
     for (let i = 1; i <= thisMonthDays; i++) {
       days.push({
         day: i,
-        hasdiary: true,
       });
     }
     this.days = days;
@@ -597,16 +576,14 @@ export default class Homepage extends wepy.page{
       }
       this.curBase = new Date(this.curYear, this.curMonth-1).getTime();
       this.$apply();
-      this.choosed = 0
+      this.choosed = 0;
+      this.getDiaryDays();
     },
     //选择一个日期
     tapDayItem(e) {
       const idx = e.currentTarget.dataset.idx;
-      if (this.choosed == idx + 1) {
-        this.choosed = 0;
-      } else {
-        this.choosed = idx + 1;
-      }
+      this.choosed = idx + 1;
+      this.getDiaryList();
     },
     //快速选择年份和日期
     chooseYearAndMonth() {
@@ -627,6 +604,7 @@ export default class Homepage extends wepy.page{
       this.pickerMonth = pickerMonth;
       this.showPicker = true;
       this.choosed = 0;
+      this.getDiaryDays();
     },
     pickerChange(e) {
       const val = e.detail.value;
@@ -730,6 +708,8 @@ export default class Homepage extends wepy.page{
     this.$apply();
   };
   onLoad() {
+    wepy.$instance.readSession();
+
     const date = new Date();
     const curYear = date.getFullYear();
     const curMonth = date.getMonth() + 1;
@@ -743,6 +723,56 @@ export default class Homepage extends wepy.page{
     this.curBase = new Date(this.curYear, this.curMonth-1).getTime();
     this.choosed = date.getDate();
     wx.setNavigationBarTitle({title: '极日记'});
+
+    this.getDiaryDays();
+    this.getDiaryList();
+  };
+
+  async getDiaryDays() {
+    let year = this.curYear;
+    let month = this.curMonth;
+    let result = await getDayHasDiary({
+      data: {
+        year: year,
+        month: month
+      }
+    });
+    if (result.statusCode === 200) {
+      let data = result.data;
+      let r = [];
+      _.forEach(data, e => {
+        r.push(parseInt(e.split('-')[2]));
+      });
+      _.forEach(this.days, e => {
+        let day = e.day;
+        e.hasDiary = _.includes(r, day);
+      });
+      this.$apply();
+    }
+  }
+
+  async getDiaryList() {
+    let year = this.curYear;
+    let month = this.curMonth;
+    let day = this.choosed;
+    let result = await getDayDiaryList({
+      data: {
+        year: year,
+        month: month,
+        day: day
+      }
+    });
+    if (result.statusCode === 200) {
+      let data = result.data;
+      _.forEach(data, e => {
+        e.time = e.create_at.split(' ')[1];
+        if (!e.title) {
+          e.title = '无标题';
+        }
+      });
+      this.diarys = data;
+      this.$apply();
+    }
   };
 }
 </script>
