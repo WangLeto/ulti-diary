@@ -60,6 +60,7 @@ export default class extends wepy.app {
         // 401 无 session 或 session 过期
         if (p.statusCode === 401) {
           this.getSession();
+          tips.showTextToast('已刷新登录状态，建议重试');
         } else if (p.statusCode === 400) {
           tips.showError('出错了！');
         }
@@ -89,8 +90,8 @@ export default class extends wepy.app {
         code: code
       }
     })).data.token;
-    wx.setStorageSync('session', session);
-    this.globalData.session = session;
+    wx.setStorageSync('session', 'Bearer ' + session);
+    this.globalData.session = 'Bearer ' + session;
   }
 }
 </script>

@@ -1,6 +1,6 @@
 import wepy from 'wepy';
 import {submitDiary, submitStar, queryDiary} from '../api/api';
-import tips from '../utils/tips';
+import {tips} from '../utils/tips';
 
 export default class testMixin extends wepy.mixin {
   data = {
@@ -46,7 +46,7 @@ export default class testMixin extends wepy.mixin {
         }
       });
     },
-    // 最终提交 
+    // 最终提交
     submitLastOnePaunch: async function () {
       this.packSubmitData();
       let title = this.name;
@@ -61,7 +61,7 @@ export default class testMixin extends wepy.mixin {
       };
       console.log(data);
       let result = await submitDiary({
-        data: data, 
+        data: data,
       });
       console.log(result);
       if (result.statusCode === 200) {

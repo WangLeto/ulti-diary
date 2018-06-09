@@ -13,7 +13,7 @@ const request = async (params = {}, url) => {
     Accept: 'application/json'
   };
   if (wepy.$instance.globalData.session) {
-    requestContent.header.Authorization = 'Bearer ' + wepy.$instance.globalData.session;
+    requestContent.header.Authorization = wepy.$instance.globalData.session;
   }
   console.log(requestContent);
   tips.showLoading('请稍等');
@@ -28,13 +28,13 @@ const submitRename = (params) => request(params, apiRoot + 'rename');
 // 图片、视频仅需 url；视频需要时长信息
 const queryDiary = (params) => request(params, apiRoot + 'queryDiary');
 const uploadFile = async (filePath) => {
-  let token = 'Bearer ' + wepy.$instance.globalData.session;
+  let token = wepy.$instance.globalData.session;
   let r = await wepy.uploadFile({
     url: apiRoot + 'uploadFile',
     filePath: filePath,
     name: 'file',
     header: {
-      token: token
+      Authorization: token
     }
   });
   if (r.statusCode === 200) {

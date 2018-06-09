@@ -138,7 +138,7 @@ export default class TextEdit extends wepy.page {
             filePath: tempFilePath,
             name: 'file',
             header: {
-              token: token
+              Authorization: token
             },
             success: function(r) {
               console.log(r);
