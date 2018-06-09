@@ -103,7 +103,7 @@ export default class testMixin extends wepy.mixin {
   };
 
   // 最终提交
-  submitLastOnePaunch = async function () {
+  submitLastOnePaunchAndGoBack = async function () {
     this.packSubmitData();
     let title = this.name;
     let type = this.type;
@@ -122,11 +122,11 @@ export default class testMixin extends wepy.mixin {
     console.log(result);
     if (result.statusCode === 200) {
       this.id = result.data;
-      tips.showOk('上传成功');
       wx.navigateBack();
+      tips.showOk('上传成功');
     } else if (result.statusCode === 401) {
       await wepy.$instance.getSession();
-      this.submitLastOnePaunch();
+      this.submitLastOnePaunchAndGoBack();
     }
   };
 

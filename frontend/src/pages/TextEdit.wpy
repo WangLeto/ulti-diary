@@ -32,8 +32,10 @@ textarea {
 }
 .title {
   height: 60rpx;
-  font-size: 35rpx;
+  font-size: 38rpx;
   margin-bottom: 30rpx;
+  font-weight: bold;
+  color: #999;
   border-bottom: 0.5px solid #999;
 }
 </style>
@@ -68,7 +70,7 @@ import {apiRoot, updateDiary} from '../api/api';
 
 export default class TextEdit extends wepy.page {
   data = {
-    pageTitle: '图文日记',
+    pageTitle: '图文日记 📝',
     isSubmitted: false,
     content: [],
     temp: '',
@@ -117,7 +119,7 @@ export default class TextEdit extends wepy.page {
       if (this.id) {
         this.doUpdateDiary();
       } else {
-        this.submitLastOnePaunch();
+        this.submitLastOnePaunchAndGoBack();
       }
     },
     previewImage: function (index) {

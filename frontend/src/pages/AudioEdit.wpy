@@ -71,7 +71,7 @@ import {uploadFile, apiRoot} from '../api/api';
 const WAIT_RECORD = 0, RECORDING = 1, RECORD_PAUSE = 2, WAIT_PLAY = 3, PLAYING = 4, PLAY_PAUSE = 5;
 export default class AudioEdit extends wepy.page {
   data = {
-    pageTitle: '语音日记',
+    pageTitle: '语音日记 🎙️',
     mainBtnAnimation: null,
     sideBtnAnimation: null,
     state: {
@@ -161,8 +161,7 @@ export default class AudioEdit extends wepy.page {
       let filePath = this.player.innerPlayer.src;
       let r = await uploadFile(filePath);
       this.finalContent = r.data.path;
-      await this.submitLastOnePaunch();
-      wx.navigateBack();
+      await this.submitLastOnePaunchAndGoBack();
     }
   };
 
@@ -210,6 +209,8 @@ export default class AudioEdit extends wepy.page {
     microsecond: 0,
     timePlusHandler: 0,
     start: function () {
+      console.log(this.currentTime);
+      console.log(this.microsecond);
       tips.showTextToast('开始录音，最长时间10分钟');
       this.recorderManager.start({
         duration: 600000
@@ -217,8 +218,7 @@ export default class AudioEdit extends wepy.page {
       this.plusSecond();
     },
     pause: function () {
-      let handler = this.timePlusHandler;
-      clearInterval(handler);
+      this.destroyHandler();
       this.recorderManager.pause();
     },
     resume: function () {
@@ -227,6 +227,7 @@ export default class AudioEdit extends wepy.page {
     },
     stop: function () {
       this.recorderManager.stop();
+      this.destroyHandler();
       this.global.recordTime = this.currentTime;
       let that = this.global;
       this.recorderManager.onStop(e => {
@@ -235,6 +236,8 @@ export default class AudioEdit extends wepy.page {
     },
     plusSecond: function () {
       let that = this;
+      this.destroyHandler();
+      console.log('启动计时');
       this.timePlusHandler = setInterval(e => {
         that.microsecond++;
         if (that.microsecond % 10 === 0) {
@@ -242,6 +245,19 @@ export default class AudioEdit extends wepy.page {
           that.global.$apply();
         }
       }, 100);
+    },
+    destroyHandler: function (youAreFucked) {
+      let handler = this.timePlusHandler;
+      if (handler) {
+        clearInterval(handler);
+        this.timePlusHandler = 0;
+        console.log('销毁计时');
+      }
+      // 神奇bug在哪里
+      if (youAreFucked) {
+        this.currentTime = 0;
+        this.microsecond = 0;
+      }
     }
   };
 
@@ -272,13 +288,11 @@ export default class AudioEdit extends wepy.page {
       this.innerPlayer.play();
     },
     pause: function () {
-      let handler = this.timePlusHandler;
-      clearInterval(handler);
+      this.destroyHandler();
       this.innerPlayer.pause();
     },
     stop: function () {
-      let handler = this.timePlusHandler;
-      clearInterval(handler);
+      this.destroyHandler();
       this.currentTime = 0;
       this.innerPlayer.stop();
     },
@@ -292,9 +306,17 @@ export default class AudioEdit extends wepy.page {
         that.microsecond++;
         if (that.microsecond % 10 === 0) {
           that.currentTime = that.microsecond / 10;
+
           if (that.currentTime === Math.ceil(that.global.recordTime)) {
             tips.showTextToast('播放结束');
-            clearInterval(that.global.player.timePlusHandler);
+
+            console.log(that.global.player.timePlusHandler);
+
+            if (that.global.player.timePlusHandler) {
+              clearInterval(that.global.player.timePlusHandler);
+              that.global.player.timePlusHandler = 0;
+            }
+
             that.currentTime = 0;
             that.microsecond = 0;
             that.global.state.current = WAIT_PLAY;
@@ -302,7 +324,23 @@ export default class AudioEdit extends wepy.page {
           that.global.$apply();
         }
       }, 100);
+    },
+    destroyHandler: function (youAreFucked) {
+      if (this.timePlusHandler) {
+        clearInterval(this.timePlusHandler);
+        this.timePlusHandler = 0;
+      }
+      if (youAreFucked) {
+        this.microsecond = 0;
+        this.currentTime = 0;
+      }
     }
   };
+
+  onUnload = function () {
+    // 一定要在退出页面前调用销毁句柄，否则会造成sb后果
+    this.player.destroyHandler();
+    this.recorder.destroyHandler(true);
+  }
 }
 </script>

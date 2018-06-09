@@ -275,6 +275,9 @@ page {
 }
 .riqi {
   position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 .cards {
   height: 470rpx;
@@ -395,7 +398,7 @@ page {
   position: relative;
   left: 0;
   top: 0;
-  border: 1rpx solid #FF9800;
+  background: #ffebcd;
 }
 .bottom-blank {
   height: 200rpx;
@@ -736,7 +739,7 @@ export default class Homepage extends wepy.page{
     this.curDate = date.getTime();
     this.curBase = new Date(this.curYear, this.curMonth-1).getTime();
     this.choosed = date.getDate();
-    wx.setNavigationBarTitle({title: '极日记'});
+    wx.setNavigationBarTitle({title: '极日记 💡'});
 
     this.getDiaryDays();
   };

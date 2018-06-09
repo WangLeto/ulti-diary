@@ -37,7 +37,7 @@ import {uploadFile} from '../api/api';
 
 export default class VideoEdit extends wepy.page {
   data = {
-    pageTitle: '视频日记',
+    pageTitle: '视频日记 📽️',
     src: '',
     videoDuration: 0,
     type: 3,
@@ -62,8 +62,7 @@ export default class VideoEdit extends wepy.page {
       let r = await uploadFile(filePath);
       console.log(r);
       this.finalContent = r.data.path;
-      await this.submitLastOnePaunch();
-      wx.navigateBack();
+      await this.submitLastOnePaunchAndGoBack();
     }
   };
 

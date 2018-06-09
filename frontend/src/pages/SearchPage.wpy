@@ -64,7 +64,7 @@
       <view class="weui-cells searchbar-result">
         <!--日记detail-->
         <scroll-view class="cards" scroll-y scroll-top="100">
-          <view class="card" wx:for="{{diarys}}" wx:key="{{index}}" data-idx="{{index}}">
+          <view class="card" wx:for="{{diarys}}" wx:key="{{index}}" data-idx="{{index}}" @tap="goDiary({{index}})">
             <view wx:if="{{item.star}}" class="star-wrapper">
               <image src="../assets/star-color.png" mode="aspectFit" class="star"></image>
             </view>
@@ -119,12 +119,41 @@ export default class Stars extends wepy.page {
         this.total = 0;
         this.doSearch();
       }
+    },
+    goDiary(index) {
+      let id = this.diarys[index].id;
+      let type = this.diarys[index].type;
+      switch (type) {
+      case 1:
+        wepy.navigateTo({
+          url: 'TextEdit?id=' + id
+        });
+        break;
+      case 2:
+        wepy.navigateTo({
+          url: 'AudioEdit?id=' + id
+        });
+        break;
+      case 3:
+        wepy.navigateTo({
+          url: 'VideoEdit?id=' + id
+        });
+        break;
+      }
     }
   };
 
   onLoad() {
-    wx.setNavigationBarTitle({title: '搜索'});
-  }
+    wx.setNavigationBarTitle({title: '搜索 🔍'});
+  };
+
+  onShow() {
+    if (this.diarys.length !== 0) {
+      this.offset = 0;
+      this.diarys = [];
+      this.doSearch();
+    }
+  };
 
   async doSearch() {
     let offset = this.offset;
@@ -140,7 +169,7 @@ export default class Stars extends wepy.page {
       let data = result.data.list;
       this.total = result.data.total;
       _.forEach(data, e => {
-        e.time = e.create_at.split(' ')[1];
+        e.time = e.create_at;
         if (!e.title) {
           e.title = '无标题';
         }

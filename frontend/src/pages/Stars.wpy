@@ -79,7 +79,7 @@ page {
       </view>
       <!--每个月的日记遍历-->
       <view wx:for="{{diarys}}" wx:key="{{index}}">
-        <view class="card">
+        <view class="card" @tap="goDiaryPage({{idx}})" id="{{index}}">
           <view class="primary">
             <image src="{{'../assets/' + alltype[item.type - 1]}}" mode="aspectFit" class="img"></image>
             <text class="text">{{item.title}}</text>
@@ -123,6 +123,33 @@ export default class Stars extends wepy.page{
     }
   };
 
+  methods = {
+    goDiaryPage: function (group, e) {
+      console.log(group);
+      console.log(e);
+      let diary = this.allDiarys[group][e.currentTarget.id];
+      let id = diary.id;
+      let type = diary.type;
+      switch (type) {
+      case 1:
+        wepy.navigateTo({
+          url: 'TextEdit?id=' + id
+        });
+        break;
+      case 2:
+        wepy.navigateTo({
+          url: 'AudioEdit?id=' + id
+        });
+        break;
+      case 3:
+        wepy.navigateTo({
+          url: 'VideoEdit?id=' + id
+        });
+        break;
+      }
+    }
+  };
+
   onReachBottom = function () {
     if (this.total > this.offset) {
       this.doSearch();
@@ -130,7 +157,12 @@ export default class Stars extends wepy.page{
   };
 
   onLoad() {
-    wx.setNavigationBarTitle({title: '我的收藏⭐'});
+    wx.setNavigationBarTitle({title: '我的收藏 ⭐'});
+  };
+
+  onShow() {
+    this.offset = 0;
+    this.allDiarys = [];
     this.doSearch();
   };
 
@@ -171,7 +203,6 @@ export default class Stars extends wepy.page{
         }
       });
       this.offset += data.length;
-
 
       this.$apply();
     } else if (result.statusCode === 401) {
