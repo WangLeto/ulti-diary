@@ -13,7 +13,7 @@
 npm install wepy-cli -g
 
 cd frontend
-npm instll
+npm install
 ```
 
 ### 实时编译
@@ -38,4 +38,11 @@ npm run dev
 
 ## 后端
 
-详见线上文档。
+### 安装依赖
+
+```bash
+cd server
+composer install
+```
+
+依赖安装完成后，按正常 `php` 运行环境进行部署

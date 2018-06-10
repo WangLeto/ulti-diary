@@ -20,6 +20,8 @@
 
 后端：PHP Laravel
 
+前后端认证令牌：JWT
+
 服务器：腾讯云
 
 ### 安装依赖
@@ -29,7 +31,7 @@
 npm install wepy-cli -g
 
 cd frontend
-npm instll
+npm install
 ```
 
 ### 实时编译
